@@ -22,6 +22,7 @@ module "terraform_github_repository_iam" {
   name               = "MgmtDPTerraformGitHubRepositoriesRole"
   policy_attachments = {
     state_access_policy = module.terraform_github_repository_policy.policy_arn
+    ssm_policy          = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
   }
 }
 
