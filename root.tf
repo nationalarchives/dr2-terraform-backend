@@ -17,7 +17,7 @@ module "terraform_dynamo" {
 
 module "terraform_github_repository_iam" {
   source             = "git::https://github.com/nationalarchives/tdr-terraform-modules.git//iam_role"
-  assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", { account_id = data.aws_caller_identity.current.account_id, repo_filter = "dp-terraform-github-repositories:*" })
+  assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", { account_id = data.aws_caller_identity.current.account_id, repo_filter = "dp-*" })
   common_tags        = {}
   name               = "MgmtDPTerraformGitHubRepositoriesRole"
   policy_attachments = {

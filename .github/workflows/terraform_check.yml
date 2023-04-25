@@ -12,6 +12,12 @@ jobs:
         with:
           message: ":warning: Secrets found in repository dp-terraform-backend"
           slack-url: ${{ secrets.SLACK_WEBHOOK }}
+      - name: Configure AWS credentials for S3 state file access
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.MANAGEMENT_ACCOUNT }}:role/MgmtDPTerraformGitHubRepositoriesRole
+          aws-region: eu-west-2
+          role-session-name: TerraformRole
       - name: Terraform Format
         id: fmt
         run: |
