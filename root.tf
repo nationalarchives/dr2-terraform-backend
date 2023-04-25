@@ -17,7 +17,7 @@ module "terraform_dynamo" {
 
 module "terraform_github_repository_iam" {
   source             = "git::https://github.com/nationalarchives/tdr-terraform-modules.git//iam_role"
-  assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", { account_id = data.aws_caller_identity.current.account_id, repo_filter = "dp-terraform-github-repositories" })
+  assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", { account_id = data.aws_caller_identity.current.account_id, repo_filter = "dp-terraform-github-repositories:*" })
   common_tags        = {}
   name               = "MgmtDPTerraformGitHubRepositoriesRole"
   policy_attachments = {
@@ -28,7 +28,7 @@ module "terraform_github_repository_iam" {
 module "terraform_github_repository_policy" {
   source        = "git::https://github.com/nationalarchives/tdr-terraform-modules.git//iam_policy"
   name          = "MgmtDPTerraformGitHubRepositoriesPolicy"
-  policy_string = templatefile("${path.module}/templates/iam_policy/terraform_state_access.json.tpl", { bucket_name = local.terraform_state_bucket_name })
+  policy_string = templatefile("${path.module}/templates/iam_policy/terraform_state_access.json.tpl", { bucket_name = local.terraform_state_bucket_name, dynamo_table_arn = module.terraform_dynamo.table_arn })
 }
 
 module "github_oidc_provider" {
