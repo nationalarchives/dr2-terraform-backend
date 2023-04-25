@@ -4,6 +4,8 @@
     {
       "Effect": "Allow",
       "Action": [
+        "dynamodb:DescribeTable",
+        "dynamodb:DeleteItem",
         "dynamodb:GetItem",
         "dynamodb:PutItem",
         "s3:GetObject",
