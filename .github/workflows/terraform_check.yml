@@ -1,6 +1,9 @@
 name: Run Terraform Checks
 on:
   pull_request:
+permissions:
+  id-token: write
+  contents: write
 jobs:
   terraform-check:
     runs-on: ubuntu-latest
