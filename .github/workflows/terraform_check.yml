@@ -1,0 +1,29 @@
+name: Run Terraform Checks
+on:
+  pull_request:
+permissions:
+  id-token: write
+  contents: write
+jobs:
+  terraform-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: nationalarchives/tdr-github-actions/.github/actions/run-git-secrets@main
+      - uses: nationalarchives/tdr-github-actions/.github/actions/slack-send@main
+        if: failure()
+        with:
+          message: ":warning: Secrets found in repository dp-terraform-backend"
+          slack-url: ${{ secrets.SLACK_WEBHOOK }}
+      - name: Configure AWS credentials for S3 state file access
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.MANAGEMENT_ACCOUNT }}:role/MgmtDPBootstrapTerraformGitHubRepositoriesRole
+          aws-region: eu-west-2
+          role-session-name: TerraformRole
+      - name: Terraform Format
+        id: fmt
+        run: |
+          terraform init
+          terraform fmt -check --recursive
+          terraform validate
