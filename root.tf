@@ -33,10 +33,27 @@ module "terraform_github_repository_iam" {
   }
 }
 
+module "terraform_github_repository_da_iam" {
+  source             = "git::https://github.com/nationalarchives/tdr-terraform-modules.git//iam_role"
+  assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", { account_id = data.aws_caller_identity.current.account_id, repo_filter = "da-*" })
+  common_tags        = {}
+  name               = "MgmtDATerraformGitHubRepositoriesRole"
+  policy_attachments = {
+    state_access_policy = module.terraform_da_github_repository_policy.policy_arn
+    ssm_policy          = "arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess"
+  }
+}
+
 module "terraform_github_repository_policy" {
   source        = "git::https://github.com/nationalarchives/tdr-terraform-modules.git//iam_policy"
   name          = "MgmtDPTerraformGitHubRepositoriesPolicy"
-  policy_string = templatefile("${path.module}/templates/iam_policy/terraform_state_access.json.tpl", { bucket_name = local.terraform_state_bucket_name, dynamo_table_arn = module.terraform_dynamo.table_arn, da_dynamo_table_arn = module.da_terraform_dynamo.table_arn })
+  policy_string = templatefile("${path.module}/templates/iam_policy/terraform_state_access.json.tpl", { bucket_name = local.terraform_state_bucket_name, dynamo_table_arn = module.terraform_dynamo.table_arn })
+}
+
+module "terraform_da_github_repository_policy" {
+  source        = "git::https://github.com/nationalarchives/tdr-terraform-modules.git//iam_policy"
+  name          = "MgmtDATerraformGitHubRepositoriesPolicy"
+  policy_string = templatefile("${path.module}/templates/iam_policy/terraform_state_access.json.tpl", { bucket_name = local.terraform_state_bucket_name, dynamo_table_arn = module.da_terraform_dynamo.table_arn })
 }
 
 module "github_oidc_provider" {

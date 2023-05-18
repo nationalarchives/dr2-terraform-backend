@@ -15,8 +15,7 @@
       "Resource": [
         "arn:aws:s3:::${bucket_name}",
         "arn:aws:s3:::${bucket_name}/*",
-        "${dynamo_table_arn}",
-        "${da_dynamo_table_arn}"
+        "${dynamo_table_arn}"
       ]
     }
   ]
