@@ -78,8 +78,6 @@ module "terraform_github_repository_policy" {
   policy_string = templatefile("${path.module}/templates/iam_policy/terraform_state_access.json.tpl", { bucket_name = local.terraform_state_bucket_name, dynamo_table_arn = module.dp_terraform_dynamo.table_arn })
 }
 
-
-
 module "terraform_da_github_repository_policy" {
   source        = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_policy"
   name          = "MgmtDATerraformGitHubRepositoriesPolicy"
@@ -93,7 +91,6 @@ module "github_oidc_provider" {
   url         = "https://token.actions.githubusercontent.com"
   common_tags = {}
 }
-
 
 module "environment_roles_intg" {
   providers = {
