@@ -74,7 +74,7 @@ module "terraform_github_terraform_environments_policy" {
 
 module "terraform_github_repository_policy" {
   source        = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_policy"
-  name          = "MgmtDPTerraformGitHubRepositoriesPolicy"
+  name          = "MgmtDPTerraformStateAccessPolicy"
   policy_string = templatefile("${path.module}/templates/iam_policy/terraform_state_access.json.tpl", { bucket_name = local.terraform_state_bucket_name, dynamo_table_arn = module.dp_terraform_dynamo.table_arn })
 }
 
