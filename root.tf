@@ -150,3 +150,9 @@ module "code_build_policy" {
   name          = "MgmtDPGithubCodeDeployPolicy"
   policy_string = templatefile("${path.module}/templates/iam_policy/code_build.json.tpl", { code_deploy_bucket = local.code_deploy_bucket_name })
 }
+
+resource "aws_cloudwatch_log_group" "terraform_log_group" {
+  for_each          = local.environments
+  name              = "terraform-plan-outputs-${each.key}"
+  retention_in_days = 7
+}
