@@ -69,6 +69,7 @@ module "terraform_github_terraform_environments_policy" {
   name     = "MgmtDPGithubTerraformEnvironmentsPolicy${each.key}"
   policy_string = templatefile("./templates/iam_policy/terraform_mgmt_assume_role.json.tpl", {
     role_arn = local.environments_roles[each.key]
+    account_id = data.aws_caller_identity.current.account_id
   })
 }
 
