@@ -1,10 +1,10 @@
 locals {
   terraform_state_bucket_name = "mgmt-dp-terraform-state"
-  environments = toset(["intg", "staging", "prod"])
+  environments                = toset(["intg", "staging", "prod"])
   environments_roles = {
-    intg = module.environment_roles_intg.role_arn
+    intg    = module.environment_roles_intg.role_arn
     staging = module.environment_roles_staging.role_arn
-    prod = module.environment_roles_prod.role_arn
+    prod    = module.environment_roles_prod.role_arn
   }
 
 }
@@ -52,7 +52,7 @@ module "terraform_github_repository_da_iam" {
 }
 
 module "terraform_github_terraform_environments" {
-  for_each = local.environments
+  for_each           = local.environments
   source             = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_role"
   assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", { account_id = data.aws_caller_identity.current.account_id, repo_filter = "dp-*" })
   name               = "MgmtDPGithubTerraformEnvironmentsRole${title(each.key)}"
@@ -65,10 +65,10 @@ module "terraform_github_terraform_environments" {
 
 module "terraform_github_terraform_environments_policy" {
   for_each = local.environments
-  source = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_policy"
-  name   = "MgmtDPGithubTerraformEnvironmentsPolicy${each.key}"
+  source   = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_policy"
+  name     = "MgmtDPGithubTerraformEnvironmentsPolicy${each.key}"
   policy_string = templatefile("./templates/iam_policy/terraform_mgmt_assume_role.json.tpl", {
-    role_arn    = local.environments_roles[each.key]
+    role_arn = local.environments_roles[each.key]
   })
 }
 
