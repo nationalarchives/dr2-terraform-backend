@@ -1,5 +1,6 @@
 locals {
   terraform_state_bucket_name = "mgmt-dp-terraform-state"
+  code_deploy_bucket_name     = "mgmt-dp-code-deploy"
   environments                = toset(["intg", "staging", "prod"])
   environments_roles = {
     intg    = module.environment_roles_intg.role_arn
@@ -125,11 +126,27 @@ module "environment_roles_prod" {
 
 module "code_deploy_bucket" {
   source      = "git::https://github.com/nationalarchives/da-terraform-modules.git//s3"
-  bucket_name = "mgmt-dp-code-deploy"
+  bucket_name = local.code_deploy_bucket_name
   bucket_policy = templatefile("${path.module}/templates/s3/code_deploy.json.tpl", {
     intg_account_number    = data.aws_ssm_parameter.intg_account_number.value,
     staging_account_number = data.aws_ssm_parameter.staging_account_number.value
     prod_account_number    = data.aws_ssm_parameter.prod_account_number.value
   })
   create_log_bucket = false
+}
+
+module "code_build_role" {
+  source             = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_role"
+  assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", { account_id = data.aws_caller_identity.current.account_id, repo_filter = "dp-*" })
+  name               = "MgmtDPGithubCodeDeploy"
+  policy_attachments = {
+    code_upload_policy = module.code_build_policy.policy_arn
+  }
+  tags = {}
+}
+
+module "code_build_policy" {
+  source        = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_policy"
+  name          = "MgmtDPGithubCodeDeployPolicy"
+  policy_string = templatefile("${path.module}/templates/iam_policy/code_build.json.tpl", { code_deploy_bucket = local.code_deploy_bucket_name })
 }
