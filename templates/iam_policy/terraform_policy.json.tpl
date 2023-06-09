@@ -42,10 +42,10 @@
       ],
       "Resource": [
         "arn:aws:iam::${account_id}:role/${environment}*",
-        "arn:aws:iam::${account_id}:role/alternat-*",
+        "arn:aws:iam::${account_id}:role/${environment_title}*",
         "arn:aws:iam::${account_id}:role/aws-service-role*",
         "arn:aws:iam::${account_id}:policy/${environment}*",
-        "arn:aws:iam::${account_id}:policy/alternat-*",
+        "arn:aws:iam::${account_id}:policy/${environment_title}*",
         "arn:aws:iam::${account_id}:instance-profile/${environment}*"
       ]
     }

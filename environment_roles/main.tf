@@ -13,7 +13,7 @@ module "terraform_role" {
 module "terraform_policy" {
   source        = "git::https://github.com/nationalarchives/da-terraform-modules//iam_policy"
   name          = "${title(var.environment)}TerraformPolicy"
-  policy_string = templatefile("./templates/iam_policy/terraform_policy.json.tpl", { account_id = var.account_number, environment = var.environment })
+  policy_string = templatefile("./templates/iam_policy/terraform_policy.json.tpl", { account_id = var.account_number, environment = var.environment, environment_title = title(var.environment) })
 }
 
 
