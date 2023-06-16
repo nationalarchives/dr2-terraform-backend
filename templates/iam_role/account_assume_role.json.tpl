@@ -6,7 +6,12 @@
       "Principal": {
         "AWS": "arn:aws:iam::${account_id}:root"
       },
-      "Action": "sts:AssumeRole"
+      "Action": "sts:AssumeRole",
+      "Condition": {
+        "StringEquals": {
+          "sts:ExternalId": "${external_id}"
+        }
+      }
     }
   ]
 }

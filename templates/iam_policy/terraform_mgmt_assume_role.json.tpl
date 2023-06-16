@@ -5,7 +5,7 @@
       "Effect": "Allow",
       "Action": "sts:AssumeRole",
       "Resource": [
-        "${role_arn}"
+        "${terraform_role_arn}"
       ]
     },
     {
