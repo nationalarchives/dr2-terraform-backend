@@ -6,6 +6,7 @@
       "Effect": "Allow",
       "Action": [
         "autoscaling:*",
+        "athena:*",
         "cloudtrail:*",
         "cloudwatch:*",
         "config:*",
@@ -13,6 +14,7 @@
         "ecr:*",
         "elasticloadbalancing:*",
         "events:*",
+        "glue:*",
         "guardduty:*",
         "iam:*",
         "kms:*",
