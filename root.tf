@@ -2,12 +2,6 @@ locals {
   terraform_state_bucket_name = "mgmt-dp-terraform-state"
   code_deploy_bucket_name     = "mgmt-dp-code-deploy"
   environments                = toset(["intg", "staging", "prod"])
-  environment_account_ids = {
-    intg    = data.aws_ssm_parameter.intg_account_number.value
-    staging = data.aws_ssm_parameter.staging_account_number.value
-    prod    = data.aws_ssm_parameter.prod_account_number.value
-    mgmt    = data.aws_caller_identity.current.account_id
-  }
   environments_roles = {
     intg    = module.environment_roles_intg.terraform_role_arn
     staging = module.environment_roles_staging.terraform_role_arn
