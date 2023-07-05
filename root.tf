@@ -145,7 +145,7 @@ module "code_deploy_bucket" {
 
 module "code_build_role" {
   source             = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_role"
-  assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", { account_id = data.aws_caller_identity.current.account_id, repo_filter = "dp-*" })
+  assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", { account_id = data.aws_caller_identity.current.account_id, repo_filter = "dr2-*" })
   name               = "MgmtDPGithubCodeDeploy"
   policy_attachments = {
     code_upload_policy = module.code_build_policy.policy_arn
