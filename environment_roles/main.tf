@@ -32,10 +32,8 @@ module "custodian_policy" {
   policy_string = templatefile("${path.root}/templates/iam_policy/custodian.json.tpl", { environment = var.environment, account_id = data.aws_caller_identity.current.account_id })
 }
 
-module "github_oidc_provider" {
-  source      = "git::https://github.com/nationalarchives/tdr-terraform-modules.git//identity_provider"
-  audience    = "sts.amazonaws.com"
-  thumbprint  = "6938fd4d98bab03faadb97b34396831e3780aea1"
-  url         = "https://token.actions.githubusercontent.com"
-  common_tags = {}
+resource "aws_iam_openid_connect_provider" "openid_provider" {
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1", "1c58a3a8518e8759bf075b76b750d4f2df264fcd"]
+  url             = "https://token.actions.githubusercontent.com"
 }
