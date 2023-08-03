@@ -34,7 +34,8 @@
         "ssm:GetParameter",
         "ssm:GetParameters",
         "ssm:ListTagsForResource",
-        "ssm:PutParameter"
+        "ssm:PutParameter",
+        "states:*"
       ],
       "Resource": "*"
     },
