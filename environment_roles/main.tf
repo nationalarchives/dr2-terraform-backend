@@ -7,7 +7,7 @@ module "terraform_role" {
   policy_attachments = {
     terraform_policy = module.terraform_policy.policy_arn
   }
-  tags = { CreatedBy = "dp-terraform-backend" }
+  tags = { CreatedBy = "dr2-terraform-backend" }
 }
 
 module "terraform_policy" {
