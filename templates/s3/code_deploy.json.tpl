@@ -21,7 +21,8 @@
       "Effect": "Allow",
       "Principal": {
         "AWS": [
-          "arn:aws:iam::${intg_account_number}:role/IntgDPGithubActionsDeployLambdaRole"
+          "arn:aws:iam::${intg_account_number}:role/IntgDPGithubActionsDeployLambdaRole",
+          "arn:aws:iam::${staging_account_number}:role/StagingDPGithubActionsDeployLambdaRole"
         ]
       },
       "Action": "s3:GetObject",
