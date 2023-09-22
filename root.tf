@@ -22,17 +22,15 @@ module "terraform_s3_bucket" {
 }
 
 module "da_terraform_dynamo" {
-  source        = "git::https://github.com/nationalarchives/da-terraform-modules.git//dynamo"
-  hash_key      = "LockID"
-  hash_key_type = "S"
-  table_name    = "mgmt-da-terraform-state-lock"
+  source     = "git::https://github.com/nationalarchives/da-terraform-modules.git//dynamo"
+  hash_key   = { type = "S", name = "LockID" }
+  table_name = "mgmt-da-terraform-state-lock"
 }
 
 module "dp_terraform_dynamo" {
-  source        = "git::https://github.com/nationalarchives/da-terraform-modules.git//dynamo"
-  hash_key      = "LockID"
-  hash_key_type = "S"
-  table_name    = "mgmt-dp-terraform-state-lock"
+  source     = "git::https://github.com/nationalarchives/da-terraform-modules.git//dynamo"
+  hash_key   = { type = "S", name = "LockID" }
+  table_name = "mgmt-dp-terraform-state-lock"
 }
 
 module "terraform_github_repository_iam" {
