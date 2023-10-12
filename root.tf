@@ -163,7 +163,7 @@ resource "aws_cloudwatch_log_group" "terraform_log_group" {
   retention_in_days = 7
 }
 
-resource "aws_ecrpublic_repository" "anonymiser" {
+resource "aws_ecrpublic_repository" "judgment_package_anonymiser" {
   provider        = aws.us_east_1
   repository_name = "anonymiser"
 
