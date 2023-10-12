@@ -162,3 +162,30 @@ resource "aws_cloudwatch_log_group" "terraform_log_group" {
   name              = "terraform-plan-outputs-${each.key}"
   retention_in_days = 7
 }
+
+resource "aws_ecrpublic_repository" "judgment_package_anonymiser" {
+  provider        = aws.us_east_1
+  repository_name = "anonymiser"
+
+  catalog_data {
+    architectures     = ["ARM"]
+    description       = "This image takes production judgment packages from TRE and anonymises them"
+    operating_systems = ["Linux"]
+  }
+}
+
+module "image_deploy_role" {
+  source             = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_role"
+  assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", { account_id = data.aws_caller_identity.current.account_id, repo_filter = "dr2-*" })
+  name               = "MgmtDPGithubImageDeploy"
+  policy_attachments = {
+    image_deploy_policy = module.image_deploy_policy.policy_arn
+  }
+  tags = {}
+}
+
+module "image_deploy_policy" {
+  source        = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_policy"
+  name          = "MgmtDPGithubImageDeployPolicy"
+  policy_string = templatefile("${path.module}/templates/iam_policy/image_deploy.json.tpl", {})
+}
