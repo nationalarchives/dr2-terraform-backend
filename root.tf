@@ -174,6 +174,26 @@ resource "aws_ecrpublic_repository" "judgment_package_anonymiser" {
   }
 }
 
+resource "aws_ecr_registry_scanning_configuration" "basic_scan_on_push" {
+  scan_type = "BASIC"
+  rule {
+    scan_frequency = "SCAN_ON_PUSH"
+
+    repository_filter {
+      filter      = "*"
+      filter_type = "WILDCARD"
+    }
+  }
+}
+
+module "e2e_tests_repository" {
+  source          = "git::https://github.com/nationalarchives/da-terraform-modules.git//ecr"
+  repository_name = "e2e-tests"
+  allowed_principals = [
+    "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:role/intg-e2e-tests-execution-role"
+  ]
+}
+
 module "image_deploy_role" {
   source             = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_role"
   assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", { account_id = data.aws_caller_identity.current.account_id, repo_filter = "dr2-*" })
