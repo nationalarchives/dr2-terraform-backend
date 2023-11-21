@@ -209,3 +209,25 @@ module "image_deploy_policy" {
   name          = "MgmtDPGithubImageDeployPolicy"
   policy_string = templatefile("${path.module}/templates/iam_policy/image_deploy.json.tpl", {})
 }
+
+module "eventbridge_alarm_notifications_destination" {
+  source                     = "git::https://github.com/nationalarchives/da-terraform-modules//eventbridge_api_destination"
+  authorisation_header_value = "Bearer ${data.aws_ssm_parameter.slack_token.value}"
+  name                       = "mgmt-eventbridge-slack-destination"
+}
+
+module "image_scan_vulnerability_alerts" {
+  source              = "git::https://github.com/nationalarchives/da-terraform-modules//eventbridge_api_destination_rule"
+  event_pattern       = templatefile("${path.module}/templates/eventbridge/image_scan_vulnerability_event_pattern.json.tpl", {})
+  name                = "mgmt-eventbridge-image-scan-vulnerabilities"
+  api_destination_arn = module.eventbridge_alarm_notifications_destination.api_destination_arn
+  input_transformer = {
+    input_paths = {
+      "repositoryName" = "$.detail.repository-name"
+    }
+    input_template = templatefile("${path.module}/templates/eventbridge/slack_message_input_template.json.tpl", {
+      channel_id   = data.aws_ssm_parameter.dr2_notifications_slack_channel.value
+      slackMessage = ":alert-noflash-slow: Vulnerabilities found in the <repositoryName> image. Log into ECR in the management account for more details"
+    })
+  }
+}
