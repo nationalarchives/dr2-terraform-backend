@@ -10,7 +10,13 @@
         "ecr-public:InitiateLayerUpload",
         "ecr-public:BatchCheckLayerAvailability",
         "ecr-public:PutImage",
-        "sts:GetServiceBearerToken"
+        "sts:GetServiceBearerToken",
+        "ecr:CompleteLayerUpload",
+        "ecr:GetAuthorizationToken",
+        "ecr:UploadLayerPart",
+        "ecr:InitiateLayerUpload",
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:PutImage"
       ],
       "Resource": "*"
     }

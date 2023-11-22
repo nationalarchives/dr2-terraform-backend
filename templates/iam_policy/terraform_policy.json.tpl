@@ -13,6 +13,7 @@
         "dynamodb:*",
         "ec2:*",
         "ecr:*",
+        "ecs:*",
         "elasticloadbalancing:*",
         "events:*",
         "glue:*",
