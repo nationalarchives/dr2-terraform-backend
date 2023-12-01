@@ -190,7 +190,8 @@ module "e2e_tests_repository" {
   source          = "git::https://github.com/nationalarchives/da-terraform-modules.git//ecr"
   repository_name = "e2e-tests"
   allowed_principals = [
-    "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:role/intg-e2e-tests-execution-role"
+    "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:role/intg-e2e-tests-execution-role",
+    "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:role/staging-e2e-tests-execution-role"
   ]
 }
 
