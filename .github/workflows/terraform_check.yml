@@ -12,8 +12,8 @@ jobs:
         with:
           submodules: recursive
           token: ${{ secrets.WORKFLOW_TOKEN }}
-      - uses: nationalarchives/tdr-github-actions/.github/actions/run-git-secrets@main
-      - uses: nationalarchives/tdr-github-actions/.github/actions/slack-send@main
+      - uses: nationalarchives/dr2-github-actions/.github/actions/run-git-secrets@main
+      - uses: nationalarchives/dr2-github-actions/.github/actions/slack-send@main
         if: failure()
         with:
           message: ":warning: Secrets found in repository dr2-terraform-backend"
