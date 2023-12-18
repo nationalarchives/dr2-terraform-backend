@@ -1,7 +1,8 @@
 locals {
-  terraform_state_bucket_name = "mgmt-dp-terraform-state"
-  code_deploy_bucket_name     = "mgmt-dp-code-deploy"
-  environments                = toset(["intg", "staging", "prod"])
+  terraform_state_bucket_name  = "mgmt-dp-terraform-state"
+  code_deploy_bucket_name      = "mgmt-dp-code-deploy"
+  environments                 = toset(["intg", "staging", "prod"])
+  dev_notifications_channel_id = "C052LJASZ08"
   environments_roles = {
     intg    = module.environment_roles_intg.terraform_role_arn
     staging = module.environment_roles_staging.terraform_role_arn
@@ -174,25 +175,20 @@ resource "aws_ecrpublic_repository" "judgment_package_anonymiser" {
   }
 }
 
-resource "aws_ecr_registry_scanning_configuration" "basic_scan_on_push" {
-  scan_type = "BASIC"
-  rule {
-    scan_frequency = "SCAN_ON_PUSH"
-
-    repository_filter {
-      filter      = "*"
-      filter_type = "WILDCARD"
-    }
-  }
+resource "aws_ecr_registry_scanning_configuration" "enhanced_scanning" {
+  scan_type = "ENHANCED"
 }
 
 module "e2e_tests_repository" {
   source          = "git::https://github.com/nationalarchives/da-terraform-modules.git//ecr"
   repository_name = "e2e-tests"
-  allowed_principals = [
-    "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:role/intg-e2e-tests-execution-role",
-    "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:role/staging-e2e-tests-execution-role"
-  ]
+  repository_policy = templatefile("${path.module}/templates/ecr/e2e_tests_repository_policy.json.tpl", {
+    allowed_principals = jsonencode([
+      "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:role/intg-e2e-tests-execution-role",
+      "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:role/staging-e2e-tests-execution-role"
+    ]),
+    account_number = data.aws_caller_identity.current.account_id
+  })
 }
 
 module "image_deploy_role" {
@@ -229,6 +225,47 @@ module "image_scan_vulnerability_alerts" {
     input_template = templatefile("${path.module}/templates/eventbridge/slack_message_input_template.json.tpl", {
       channel_id   = data.aws_ssm_parameter.dr2_notifications_slack_channel.value
       slackMessage = ":alert-noflash-slow: Vulnerabilities found in the <repositoryName> image. Log into ECR in the management account for more details"
+    })
+  }
+}
+
+module "enhanced_scanning_inspector_findings_alerts" {
+  source = "git::https://github.com/nationalarchives/da-terraform-modules//eventbridge_api_destination_rule"
+  event_pattern = templatefile("${path.module}/templates/eventbridge/generic_event_pattern.json.tpl", {
+    source      = "aws.inspector2",
+    detail_type = "Inspector2 Finding"
+  })
+  name                = "mgmt-ecr-inspector-findings"
+  api_destination_arn = module.eventbridge_alarm_notifications_destination.api_destination_arn
+  input_transformer = {
+    input_paths = {
+      "vulnerabilityId" : "$.detail.packageVulnerabilityDetails.vulnerabilityId",
+      "repositoryName" : "$.detail.resources[0].details.awsEcrContainerImage.repositoryName",
+      "severity" : "$.detail.severity"
+    }
+    input_template = templatefile("${path.module}/templates/eventbridge/slack_message_input_template.json.tpl", {
+      channel_id   = local.dev_notifications_channel_id
+      slackMessage = ":alert-noflash-slow: Vulnerability <vulnerabilityId> with <severity> severity found in repository <repositoryName>"
+    })
+  }
+}
+
+module "enhanced_scanning_inspector_initial_scan_alert" {
+  source = "git::https://github.com/nationalarchives/da-terraform-modules//eventbridge_api_destination_rule"
+  event_pattern = templatefile("${path.module}/templates/eventbridge/generic_event_pattern.json.tpl", {
+    source      = "aws.inspector2",
+    detail_type = "Inspector2 Scan"
+  })
+  name                = "mgmt-ecr-inspector-initial-scan"
+  api_destination_arn = module.eventbridge_alarm_notifications_destination.api_destination_arn
+  input_transformer = {
+    input_paths = {
+      "totalFindings" : "$.detail.finding-severity-counts.TOTAL",
+      "repositoryName" : "$.detail.repository-name"
+    }
+    input_template = templatefile("${path.module}/templates/eventbridge/slack_message_input_template.json.tpl", {
+      channel_id   = local.dev_notifications_channel_id
+      slackMessage = ":alert-noflash-slow: Initial scan complete for `<repositoryName>` <totalFindings> vulnerabilities found"
     })
   }
 }
