@@ -20,6 +20,12 @@ provider "aws" {
     role_arn     = "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:role/IntgTerraformBootstrapRole"
     session_name = "terraform-backend"
   }
+  default_tags {
+    tags = {
+      Environment = "intg"
+      CreatedBy   = "dr2-terraform-backend"
+    }
+  }
 }
 
 provider "aws" {
@@ -29,6 +35,12 @@ provider "aws" {
     role_arn     = "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:role/StagingTerraformBootstrapRole"
     session_name = "terraform-backend"
   }
+  default_tags {
+    tags = {
+      Environment = "staging"
+      CreatedBy   = "dr2-terraform-backend"
+    }
+  }
 }
 
 provider "aws" {
@@ -37,5 +49,11 @@ provider "aws" {
   assume_role {
     role_arn     = "arn:aws:iam::${data.aws_ssm_parameter.prod_account_number.value}:role/ProdTerraformBootstrapRole"
     session_name = "terraform-backend"
+  }
+  default_tags {
+    tags = {
+      Environment = "prod"
+      CreatedBy   = "dr2-terraform-backend"
+    }
   }
 }

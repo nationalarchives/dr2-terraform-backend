@@ -1,5 +1,11 @@
 data "aws_caller_identity" "current" {}
 
+locals {
+  preservica_tenant           = var.environment == "prod" ? "tna" : "tnatest"
+  tna_to_preservica_role_name = "${var.environment}-tna-to-preservica-ingest-s3-${local.preservica_tenant}"
+  tna_to_preservica_role_arn  = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.tna_to_preservica_role_name}"
+}
+
 module "terraform_role" {
   source             = "git::https://github.com/nationalarchives/da-terraform-modules//iam_role"
   assume_role_policy = templatefile("./templates/iam_role/account_assume_role.json.tpl", { account_id = var.management_account_number, external_id = var.terraform_external_id })
@@ -37,3 +43,30 @@ resource "aws_iam_openid_connect_provider" "openid_provider" {
   thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1", "1c58a3a8518e8759bf075b76b750d4f2df264fcd"]
   url             = "https://token.actions.githubusercontent.com"
 }
+
+module "copy_tna_to_preservica_role" {
+  source = "git::https://github.com/nationalarchives/da-terraform-modules//iam_role"
+  assume_role_policy = templatefile("./templates/iam_role/tna_to_preservica_trust_policy.json.tpl", {
+    terraform_role_arn    = module.terraform_role.role_arn,
+    account_id            = data.aws_caller_identity.current.account_id,
+    management_account_id = var.management_account_number
+    title_environment     = title(var.environment)
+  })
+  name = local.tna_to_preservica_role_name
+  policy_attachments = {
+    copy_tna_to_preservica_policy = module.copy_tna_to_preservica_policy.policy_arn
+  }
+  tags = {}
+}
+
+module "copy_tna_to_preservica_policy" {
+  source = "git::https://github.com/nationalarchives/da-terraform-modules//iam_policy"
+  name   = "${var.environment}-tna-to-preservica-ingest-s3-${var.environment == "prod" ? "tna" : "tnatest"}-policy"
+  policy_string = templatefile("./templates/iam_policy/tna_to_preservica_copy.json.tpl", {
+    account_id                       = data.aws_caller_identity.current.account_id
+    preservica_tenant                = local.preservica_tenant
+    ingest_staging_cache_bucket_name = "${var.environment}-dr2-ingest-staging-cache",
+    tna_to_preservica_role_arn       = local.tna_to_preservica_role_arn
+  })
+}
+

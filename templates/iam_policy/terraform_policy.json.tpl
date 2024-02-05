@@ -10,6 +10,7 @@
         "cloudtrail:*",
         "cloudwatch:*",
         "config:*",
+        "datasync:*",
         "dynamodb:*",
         "ec2:*",
         "ecr:*",
