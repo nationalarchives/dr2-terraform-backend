@@ -218,7 +218,7 @@ module "image_scan_vulnerability_alerts" {
   event_pattern       = templatefile("${path.module}/templates/eventbridge/image_scan_vulnerability_event_pattern.json.tpl", {})
   name                = "mgmt-eventbridge-image-scan-vulnerabilities"
   api_destination_arn = module.eventbridge_alarm_notifications_destination.api_destination_arn
-  input_transformer = {
+  api_destination_input_transformer = {
     input_paths = {
       "repositoryName" = "$.detail.repository-name"
     }
@@ -237,7 +237,7 @@ module "enhanced_scanning_inspector_findings_alerts" {
   })
   name                = "mgmt-ecr-inspector-findings"
   api_destination_arn = module.eventbridge_alarm_notifications_destination.api_destination_arn
-  input_transformer = {
+  api_destination_input_transformer = {
     input_paths = {
       "vulnerabilityId" : "$.detail.packageVulnerabilityDetails.vulnerabilityId",
       "repositoryName" : "$.detail.resources[0].details.awsEcrContainerImage.repositoryName",
@@ -258,7 +258,7 @@ module "enhanced_scanning_inspector_initial_scan_alert" {
   })
   name                = "mgmt-ecr-inspector-initial-scan"
   api_destination_arn = module.eventbridge_alarm_notifications_destination.api_destination_arn
-  input_transformer = {
+  api_destination_input_transformer = {
     input_paths = {
       "totalFindings" : "$.detail.finding-severity-counts.TOTAL",
       "repositoryName" : "$.detail.repository-name"
