@@ -94,41 +94,49 @@ module "environment_roles_intg" {
   providers = {
     aws = aws.intg
   }
-  source                    = "./environment_roles"
-  account_number            = data.aws_ssm_parameter.intg_account_number.value
-  environment               = "intg"
-  management_account_number = data.aws_caller_identity.current.account_id
-  terraform_external_id     = module.terraform_config.terraform_config["intg"]["terraform_external_id"]
+  source                        = "./environment_roles"
+  account_number                = data.aws_ssm_parameter.intg_account_number.value
+  environment                   = "intg"
+  management_account_number     = data.aws_caller_identity.current.account_id
+  terraform_external_id         = module.terraform_config.terraform_config["intg"]["terraform_external_id"]
+  terraform_github_role_arn     = module.terraform_github_repository_iam.role_arn
+  management_developer_role_arn = data.aws_ssm_parameter.dev_admin_role.value
 }
 
 module "environment_roles_staging" {
   providers = {
     aws = aws.staging
   }
-  source                    = "./environment_roles"
-  account_number            = data.aws_ssm_parameter.staging_account_number.value
-  environment               = "staging"
-  management_account_number = data.aws_caller_identity.current.account_id
-  terraform_external_id     = module.terraform_config.terraform_config["staging"]["terraform_external_id"]
+  source                        = "./environment_roles"
+  account_number                = data.aws_ssm_parameter.staging_account_number.value
+  environment                   = "staging"
+  management_account_number     = data.aws_caller_identity.current.account_id
+  terraform_external_id         = module.terraform_config.terraform_config["staging"]["terraform_external_id"]
+  terraform_github_role_arn     = module.terraform_github_repository_iam.role_arn
+  management_developer_role_arn = data.aws_ssm_parameter.dev_admin_role.value
 }
 
 module "environment_roles_prod" {
   providers = {
     aws = aws.prod
   }
-  source                    = "./environment_roles"
-  account_number            = data.aws_ssm_parameter.prod_account_number.value
-  environment               = "prod"
-  management_account_number = data.aws_caller_identity.current.account_id
-  terraform_external_id     = module.terraform_config.terraform_config["prod"]["terraform_external_id"]
+  source                        = "./environment_roles"
+  account_number                = data.aws_ssm_parameter.prod_account_number.value
+  environment                   = "prod"
+  management_account_number     = data.aws_caller_identity.current.account_id
+  terraform_external_id         = module.terraform_config.terraform_config["prod"]["terraform_external_id"]
+  terraform_github_role_arn     = module.terraform_github_repository_iam.role_arn
+  management_developer_role_arn = data.aws_ssm_parameter.dev_admin_role.value
 }
 
 module "environment_roles_mgmt" {
-  source                    = "./environment_roles"
-  account_number            = data.aws_caller_identity.current.account_id
-  environment               = "mgmt"
-  management_account_number = data.aws_caller_identity.current.account_id
-  terraform_external_id     = module.terraform_config.terraform_config["mgmt"]["terraform_external_id"]
+  source                        = "./environment_roles"
+  account_number                = data.aws_caller_identity.current.account_id
+  environment                   = "mgmt"
+  management_account_number     = data.aws_caller_identity.current.account_id
+  terraform_external_id         = module.terraform_config.terraform_config["mgmt"]["terraform_external_id"]
+  terraform_github_role_arn     = module.terraform_github_repository_iam.role_arn
+  management_developer_role_arn = data.aws_ssm_parameter.dev_admin_role.value
 }
 
 module "code_deploy_bucket" {

@@ -47,10 +47,11 @@ resource "aws_iam_openid_connect_provider" "openid_provider" {
 module "copy_tna_to_preservica_role" {
   source = "git::https://github.com/nationalarchives/da-terraform-modules//iam_role"
   assume_role_policy = templatefile("./templates/iam_role/tna_to_preservica_trust_policy.json.tpl", {
-    terraform_role_arn    = module.terraform_role.role_arn,
-    account_id            = data.aws_caller_identity.current.account_id,
-    management_account_id = var.management_account_number
-    title_environment     = title(var.environment)
+    terraform_role_arn        = module.terraform_role.role_arn,
+    account_id                = data.aws_caller_identity.current.account_id,
+    admin_role_arn            = var.management_developer_role_arn
+    terraform_github_role_arn = var.terraform_github_role_arn
+    title_environment         = title(var.environment)
   })
   name = local.tna_to_preservica_role_name
   policy_attachments = {

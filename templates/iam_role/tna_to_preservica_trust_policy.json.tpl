@@ -4,7 +4,7 @@
     {
       "Effect": "Allow",
       "Principal": {
-        "AWS": "arn:aws:iam::${management_account_id}:root"
+        "AWS": ["${terraform_github_role_arn}", "${admin_role_arn}"]
       },
       "Action": "sts:AssumeRole"
     },
