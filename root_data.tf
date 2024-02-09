@@ -20,3 +20,7 @@ data "aws_ssm_parameter" "slack_token" {
 data "aws_ssm_parameter" "dr2_notifications_slack_channel" {
   name = "/mgmt/slack/notifications/channel"
 }
+
+data "aws_ssm_parameter" "dev_admin_role" {
+  name = "/mgmt/developer_role"
+}

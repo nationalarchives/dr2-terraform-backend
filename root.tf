@@ -94,41 +94,49 @@ module "environment_roles_intg" {
   providers = {
     aws = aws.intg
   }
-  source                    = "./environment_roles"
-  account_number            = data.aws_ssm_parameter.intg_account_number.value
-  environment               = "intg"
-  management_account_number = data.aws_caller_identity.current.account_id
-  terraform_external_id     = module.terraform_config.terraform_config["intg"]["terraform_external_id"]
+  source                        = "./environment_roles"
+  account_number                = data.aws_ssm_parameter.intg_account_number.value
+  environment                   = "intg"
+  management_account_number     = data.aws_caller_identity.current.account_id
+  terraform_external_id         = module.terraform_config.terraform_config["intg"]["terraform_external_id"]
+  terraform_github_role_arn     = module.terraform_github_repository_iam.role_arn
+  management_developer_role_arn = data.aws_ssm_parameter.dev_admin_role.value
 }
 
 module "environment_roles_staging" {
   providers = {
     aws = aws.staging
   }
-  source                    = "./environment_roles"
-  account_number            = data.aws_ssm_parameter.staging_account_number.value
-  environment               = "staging"
-  management_account_number = data.aws_caller_identity.current.account_id
-  terraform_external_id     = module.terraform_config.terraform_config["staging"]["terraform_external_id"]
+  source                        = "./environment_roles"
+  account_number                = data.aws_ssm_parameter.staging_account_number.value
+  environment                   = "staging"
+  management_account_number     = data.aws_caller_identity.current.account_id
+  terraform_external_id         = module.terraform_config.terraform_config["staging"]["terraform_external_id"]
+  terraform_github_role_arn     = module.terraform_github_repository_iam.role_arn
+  management_developer_role_arn = data.aws_ssm_parameter.dev_admin_role.value
 }
 
 module "environment_roles_prod" {
   providers = {
     aws = aws.prod
   }
-  source                    = "./environment_roles"
-  account_number            = data.aws_ssm_parameter.prod_account_number.value
-  environment               = "prod"
-  management_account_number = data.aws_caller_identity.current.account_id
-  terraform_external_id     = module.terraform_config.terraform_config["prod"]["terraform_external_id"]
+  source                        = "./environment_roles"
+  account_number                = data.aws_ssm_parameter.prod_account_number.value
+  environment                   = "prod"
+  management_account_number     = data.aws_caller_identity.current.account_id
+  terraform_external_id         = module.terraform_config.terraform_config["prod"]["terraform_external_id"]
+  terraform_github_role_arn     = module.terraform_github_repository_iam.role_arn
+  management_developer_role_arn = data.aws_ssm_parameter.dev_admin_role.value
 }
 
 module "environment_roles_mgmt" {
-  source                    = "./environment_roles"
-  account_number            = data.aws_caller_identity.current.account_id
-  environment               = "mgmt"
-  management_account_number = data.aws_caller_identity.current.account_id
-  terraform_external_id     = module.terraform_config.terraform_config["mgmt"]["terraform_external_id"]
+  source                        = "./environment_roles"
+  account_number                = data.aws_caller_identity.current.account_id
+  environment                   = "mgmt"
+  management_account_number     = data.aws_caller_identity.current.account_id
+  terraform_external_id         = module.terraform_config.terraform_config["mgmt"]["terraform_external_id"]
+  terraform_github_role_arn     = module.terraform_github_repository_iam.role_arn
+  management_developer_role_arn = data.aws_ssm_parameter.dev_admin_role.value
 }
 
 module "code_deploy_bucket" {
@@ -218,7 +226,7 @@ module "image_scan_vulnerability_alerts" {
   event_pattern       = templatefile("${path.module}/templates/eventbridge/image_scan_vulnerability_event_pattern.json.tpl", {})
   name                = "mgmt-eventbridge-image-scan-vulnerabilities"
   api_destination_arn = module.eventbridge_alarm_notifications_destination.api_destination_arn
-  input_transformer = {
+  api_destination_input_transformer = {
     input_paths = {
       "repositoryName" = "$.detail.repository-name"
     }
@@ -237,7 +245,7 @@ module "enhanced_scanning_inspector_findings_alerts" {
   })
   name                = "mgmt-ecr-inspector-findings"
   api_destination_arn = module.eventbridge_alarm_notifications_destination.api_destination_arn
-  input_transformer = {
+  api_destination_input_transformer = {
     input_paths = {
       "vulnerabilityId" : "$.detail.packageVulnerabilityDetails.vulnerabilityId",
       "repositoryName" : "$.detail.resources[0].details.awsEcrContainerImage.repositoryName",
@@ -258,7 +266,7 @@ module "enhanced_scanning_inspector_initial_scan_alert" {
   })
   name                = "mgmt-ecr-inspector-initial-scan"
   api_destination_arn = module.eventbridge_alarm_notifications_destination.api_destination_arn
-  input_transformer = {
+  api_destination_input_transformer = {
     input_paths = {
       "totalFindings" : "$.detail.finding-severity-counts.TOTAL",
       "repositoryName" : "$.detail.repository-name"
