@@ -45,6 +45,7 @@ resource "aws_iam_openid_connect_provider" "openid_provider" {
 }
 
 module "copy_tna_to_preservica_role" {
+  count  = var.environment == "mgmt" ? 0 : 1
   source = "git::https://github.com/nationalarchives/da-terraform-modules//iam_role"
   assume_role_policy = templatefile("./templates/iam_role/tna_to_preservica_trust_policy.json.tpl", {
     terraform_role_arn        = module.terraform_role.role_arn,
@@ -55,12 +56,13 @@ module "copy_tna_to_preservica_role" {
   })
   name = local.tna_to_preservica_role_name
   policy_attachments = {
-    copy_tna_to_preservica_policy = module.copy_tna_to_preservica_policy.policy_arn
+    copy_tna_to_preservica_policy = module.copy_tna_to_preservica_policy[count.index].policy_arn
   }
   tags = {}
 }
 
 module "copy_tna_to_preservica_policy" {
+  count  = var.environment == "mgmt" ? 0 : 1
   source = "git::https://github.com/nationalarchives/da-terraform-modules//iam_policy"
   name   = "${var.environment}-tna-to-preservica-ingest-s3-${var.environment == "prod" ? "tna" : "tnatest"}-policy"
   policy_string = templatefile("./templates/iam_policy/tna_to_preservica_copy.json.tpl", {
