@@ -30,4 +30,3 @@ jobs:
           terraform init
           terraform fmt -check --recursive
           terraform validate
-
