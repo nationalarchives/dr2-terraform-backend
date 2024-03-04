@@ -5,7 +5,10 @@
       "Effect": "Allow",
       "Action": "sts:AssumeRole",
       "Resource": [
-        "${terraform_role_arn}"
+        "${terraform_role_arn}",
+        "${preservica_copy_role_intg_arn}",
+        "${preservica_copy_role_staging_arn}",
+        "${preservica_copy_role_prod_arn}"
       ]
     },
     {

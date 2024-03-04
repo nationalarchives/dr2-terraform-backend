@@ -8,6 +8,7 @@ locals {
     staging = module.environment_roles_staging.terraform_role_arn
     prod    = module.environment_roles_prod.terraform_role_arn
   }
+
 }
 
 module "terraform_config" {
@@ -73,8 +74,11 @@ module "terraform_github_terraform_environments_policy" {
   source   = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_policy"
   name     = "MgmtDPGithubTerraformEnvironmentsPolicy${each.key}"
   policy_string = templatefile("./templates/iam_policy/terraform_mgmt_assume_role.json.tpl", {
-    terraform_role_arn = local.environments_roles[each.key]
-    account_id         = data.aws_caller_identity.current.account_id
+    terraform_role_arn               = local.environments_roles[each.key]
+    preservica_copy_role_intg_arn    = module.environment_roles_intg.copy_tna_to_preservica_role_arn[0]
+    preservica_copy_role_staging_arn = module.environment_roles_staging.copy_tna_to_preservica_role_arn[0]
+    preservica_copy_role_prod_arn    = module.environment_roles_prod.copy_tna_to_preservica_role_arn[0]
+    account_id                       = data.aws_caller_identity.current.account_id
   })
 }
 
@@ -99,7 +103,7 @@ module "environment_roles_intg" {
   environment                   = "intg"
   management_account_number     = data.aws_caller_identity.current.account_id
   terraform_external_id         = module.terraform_config.terraform_config["intg"]["terraform_external_id"]
-  terraform_github_role_arn     = module.terraform_github_repository_iam.role_arn
+  terraform_github_role_arn     = module.terraform_github_terraform_environments["intg"].role_arn
   management_developer_role_arn = data.aws_ssm_parameter.dev_admin_role.value
 }
 
@@ -112,7 +116,7 @@ module "environment_roles_staging" {
   environment                   = "staging"
   management_account_number     = data.aws_caller_identity.current.account_id
   terraform_external_id         = module.terraform_config.terraform_config["staging"]["terraform_external_id"]
-  terraform_github_role_arn     = module.terraform_github_repository_iam.role_arn
+  terraform_github_role_arn     = module.terraform_github_terraform_environments["staging"].role_arn
   management_developer_role_arn = data.aws_ssm_parameter.dev_admin_role.value
 }
 
@@ -125,7 +129,7 @@ module "environment_roles_prod" {
   environment                   = "prod"
   management_account_number     = data.aws_caller_identity.current.account_id
   terraform_external_id         = module.terraform_config.terraform_config["prod"]["terraform_external_id"]
-  terraform_github_role_arn     = module.terraform_github_repository_iam.role_arn
+  terraform_github_role_arn     = module.terraform_github_terraform_environments["prod"].role_arn
   management_developer_role_arn = data.aws_ssm_parameter.dev_admin_role.value
 }
 
