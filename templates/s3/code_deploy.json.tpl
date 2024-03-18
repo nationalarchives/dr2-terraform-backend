@@ -26,8 +26,11 @@
           "arn:aws:iam::${prod_account_number}:role/ProdDPGithubActionsDeployLambdaRole"
         ]
       },
-      "Action": "s3:GetObject",
-      "Resource": "arn:aws:s3:::mgmt-dp-code-deploy/*"
+      "Action": ["s3:GetObject", "s3:ListBucket"],
+      "Resource": [
+        "arn:aws:s3:::mgmt-dp-code-deploy/*",
+        "arn:aws:s3:::mgmt-dp-code-deploy"
+      ]
     }
   ]
 }
