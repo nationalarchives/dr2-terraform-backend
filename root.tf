@@ -194,10 +194,21 @@ resource "aws_ecr_registry_scanning_configuration" "enhanced_scanning" {
 module "e2e_tests_repository" {
   source          = "git::https://github.com/nationalarchives/da-terraform-modules.git//ecr"
   repository_name = "e2e-tests"
-  repository_policy = templatefile("${path.module}/templates/ecr/e2e_tests_repository_policy.json.tpl", {
+  repository_policy = templatefile("${path.module}/templates/ecr/cross_account_repository_policy.json.tpl", {
     allowed_principals = jsonencode([
-      "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:role/intg-e2e-tests-execution-role",
+      "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:role/intg-dr2-e2e-tests-execution-role",
       "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:role/staging-e2e-tests-execution-role"
+    ]),
+    account_number = data.aws_caller_identity.current.account_id
+  })
+}
+
+module "disaster_recovery_repository" {
+  source          = "git::https://github.com/nationalarchives/da-terraform-modules.git//ecr"
+  repository_name = "dr2-disaster-recovery"
+  repository_policy = templatefile("${path.module}/templates/ecr/cross_account_repository_policy.json.tpl", {
+    allowed_principals = jsonencode([
+      "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:user/intg-dr2-disaster-recovery"
     ]),
     account_number = data.aws_caller_identity.current.account_id
   })
