@@ -197,7 +197,7 @@ module "e2e_tests_repository" {
   repository_policy = templatefile("${path.module}/templates/ecr/cross_account_repository_policy.json.tpl", {
     allowed_principals = jsonencode([
       "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:role/intg-dr2-e2e-tests-execution-role",
-      "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:role/staging-e2e-tests-execution-role"
+      "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:role/staging-dr2-e2e-tests-execution-role"
     ]),
     account_number = data.aws_caller_identity.current.account_id
   })
