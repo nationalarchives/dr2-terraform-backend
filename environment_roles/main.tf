@@ -53,6 +53,7 @@ module "copy_tna_to_preservica_role" {
     admin_role_arn            = var.management_developer_role_arn
     terraform_github_role_arn = var.terraform_github_role_arn
     title_environment         = title(var.environment)
+    environment               = var.environment
   })
   name = local.tna_to_preservica_role_name
   policy_attachments = {
