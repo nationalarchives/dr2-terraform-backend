@@ -22,10 +22,19 @@ module "terraform_policy" {
   policy_string = templatefile("./templates/iam_policy/terraform_policy.json.tpl", { account_id = var.account_number, environment = var.environment, environment_title = title(var.environment) })
 }
 
+module "custodian_repo_filters" {
+  source       = "../github_repository_filters"
+  repositories = [{ name : "tna-custodian", "default_branch" : "master" }]
+  environments = ["dr2-intg", "dr2-staging", "dr2-prod", "dr2-mgmt"]
+}
+
 module "custodian_role" {
-  source             = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_role"
-  assume_role_policy = templatefile("${path.root}/templates/iam_role/github_assume_role.json.tpl", { account_id = data.aws_caller_identity.current.account_id, repo_filter = "tna-*" })
-  name               = "${title(var.environment)}DR2GithubActionsCustodianDeployRole"
+  source = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_role"
+  assume_role_policy = templatefile("${path.root}/templates/iam_role/github_assume_role.json.tpl", {
+    account_id   = data.aws_caller_identity.current.account_id,
+    repo_filters = jsonencode(module.custodian_repo_filters.repository_environments["dr2-${var.environment}"])
+  })
+  name = "${title(var.environment)}DR2GithubActionsCustodianDeployRole"
   policy_attachments = {
     custodian_policy = module.custodian_policy.policy_arn
   }
