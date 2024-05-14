@@ -3,12 +3,57 @@ locals {
   code_deploy_bucket_name      = "mgmt-dp-code-deploy"
   environments                 = toset(["intg", "staging", "prod"])
   dev_notifications_channel_id = "C052LJASZ08"
+  department_terraform_repositories = [
+    { name : "tna-custodian", default_branch : "master" },
+    { name : "tdr-aws-accounts", default_branch : "master" }
+  ]
+  department_terraform_github_environments = [
+    "dr2-intg",
+    "dr2-staging",
+    "dr2-prod",
+    "dr2-mgmt"
+  ]
+  dr2_terraform_repositories = [
+    { name : "dr2-terraform-environments" }
+  ]
+  dr2_terraform_github_environments = [
+    "intg",
+    "staging",
+    "prod",
+    "sbox",
+    "mgmt"
+  ]
+  dr2_code_deploy_repositories  = [{ name : "dr2-ingest" }, { name : "dr2-ip-lock-checker" }]
+  dr2_code_deploy_environments  = ["intg", "staging", "prod"]
+  dr2_image_deploy_repositories = [{ name : "dr2-e2e-tests" }, { name : "dr2-court-document-package-anonymiser" }]
   environments_roles = {
     intg    = module.environment_roles_intg.terraform_role_arn
     staging = module.environment_roles_staging.terraform_role_arn
     prod    = module.environment_roles_prod.terraform_role_arn
   }
+}
 
+module "department_terraform_repository_filters" {
+  source       = "./github_repository_filters"
+  repositories = local.department_terraform_repositories
+  environments = local.department_terraform_github_environments
+}
+
+module "dr2_terraform_repository_filters" {
+  source       = "./github_repository_filters"
+  repositories = local.dr2_terraform_repositories
+  environments = local.dr2_terraform_github_environments
+}
+
+module "dr2_code_deploy_repository_filters" {
+  source       = "./github_repository_filters"
+  repositories = local.dr2_code_deploy_repositories
+  environments = local.dr2_code_deploy_environments
+}
+
+module "dr2_image_deploy_repository_filters" {
+  source       = "./github_repository_filters"
+  repositories = local.dr2_image_deploy_repositories
 }
 
 module "terraform_config" {
@@ -36,9 +81,12 @@ module "dp_terraform_dynamo" {
 }
 
 module "terraform_github_repository_iam" {
-  source             = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_role"
-  assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", { account_id = data.aws_caller_identity.current.account_id, repo_filter = "dr2-*" })
-  name               = "MgmtDPTerraformGitHubRepositoriesRole"
+  source = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_role"
+  assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", {
+    account_id   = data.aws_caller_identity.current.account_id,
+    repo_filters = jsonencode(["repo:nationalarchives/dr2-terraform-github-repositories:ref:refs/heads/main"])
+  })
+  name = "MgmtDPTerraformGitHubRepositoriesRole"
   policy_attachments = {
     state_access_policy = module.terraform_github_repository_policy.policy_arn
     ssm_policy          = "arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess"
@@ -47,9 +95,12 @@ module "terraform_github_repository_iam" {
 }
 
 module "terraform_github_repository_da_iam" {
-  source             = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_role"
-  assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", { account_id = data.aws_caller_identity.current.account_id, repo_filter = "da-*" })
-  name               = "MgmtDATerraformGitHubRepositoriesRole"
+  source = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_role"
+  assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", {
+    account_id   = data.aws_caller_identity.current.account_id,
+    repo_filters = jsonencode(["repo:nationalarchives/da-terraform-github-repositories:ref:refs/heads/main"])
+  })
+  name = "MgmtDATerraformGitHubRepositoriesRole"
   policy_attachments = {
     state_access_policy = module.terraform_da_github_repository_policy.policy_arn
     ssm_policy          = "arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess"
@@ -58,10 +109,16 @@ module "terraform_github_repository_da_iam" {
 }
 
 module "terraform_github_terraform_environments" {
-  for_each           = local.environments
-  source             = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_role"
-  assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", { account_id = data.aws_caller_identity.current.account_id, repo_filter = "*" })
-  name               = "MgmtDPGithubTerraformEnvironmentsRole${title(each.key)}"
+  for_each = local.environments
+  source   = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_role"
+  assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", {
+    account_id = data.aws_caller_identity.current.account_id,
+    repo_filters = jsonencode(concat(
+      module.department_terraform_repository_filters.repository_environments["dr2-${each.key}"],
+      module.dr2_terraform_repository_filters.repository_environments[each.key]
+    ))
+  })
+  name = "MgmtDPGithubTerraformEnvironmentsRole${title(each.key)}"
   policy_attachments = {
     state_access_policy           = module.terraform_github_repository_policy.policy_arn
     terraform_environments_policy = module.terraform_github_terraform_environments_policy[each.key].policy_arn
@@ -155,9 +212,12 @@ module "code_deploy_bucket" {
 }
 
 module "code_build_role" {
-  source             = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_role"
-  assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", { account_id = data.aws_caller_identity.current.account_id, repo_filter = "dr2-*" })
-  name               = "MgmtDPGithubCodeDeploy"
+  source = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_role"
+  assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", {
+    account_id   = data.aws_caller_identity.current.account_id,
+    repo_filters = jsonencode(module.dr2_code_deploy_repository_filters.repository_filters)
+  })
+  name = "MgmtDPGithubCodeDeploy"
   policy_attachments = {
     code_upload_policy = module.code_build_policy.policy_arn
   }
@@ -215,9 +275,12 @@ module "disaster_recovery_repository" {
 }
 
 module "image_deploy_role" {
-  source             = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_role"
-  assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", { account_id = data.aws_caller_identity.current.account_id, repo_filter = "dr2-*" })
-  name               = "MgmtDPGithubImageDeploy"
+  source = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_role"
+  assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", {
+    account_id   = data.aws_caller_identity.current.account_id,
+    repo_filters = jsonencode(module.dr2_image_deploy_repository_filters.repository_filters)
+  })
+  name = "MgmtDPGithubImageDeploy"
   policy_attachments = {
     image_deploy_policy = module.image_deploy_policy.policy_arn
   }

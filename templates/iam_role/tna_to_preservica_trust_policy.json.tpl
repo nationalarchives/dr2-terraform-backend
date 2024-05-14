@@ -13,7 +13,6 @@
       "Effect": "Allow",
       "Principal": {
         "AWS": [
-          "arn:aws:iam::${account_id}:role/${title_environment}-ingest-role",
           "arn:aws:iam::${account_id}:role/${environment}-dr2-ingest-role"
         ]
       },
