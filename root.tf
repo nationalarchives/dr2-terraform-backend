@@ -25,7 +25,7 @@ locals {
   ]
   dr2_code_deploy_repositories  = [{ name : "dr2-ingest" }, { name : "dr2-ip-lock-checker" }]
   dr2_code_deploy_environments  = ["intg", "staging", "prod"]
-  dr2_image_deploy_repositories = [{ name : "dr2-e2e-tests" }, { name : "dr2-court-document-package-anonymiser" }]
+  dr2_image_deploy_repositories = [{ name : "dr2-e2e-tests" }, { name : "dr2-court-document-package-anonymiser" }, { name : "dr2-disaster-recovery" }]
   environments_roles = {
     intg    = module.environment_roles_intg.terraform_role_arn
     staging = module.environment_roles_staging.terraform_role_arn
