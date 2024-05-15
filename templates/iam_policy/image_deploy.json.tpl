@@ -4,19 +4,21 @@
     {
       "Effect": "Allow",
       "Action": [
-        "ecr-public:CompleteLayerUpload",
-        "ecr-public:GetAuthorizationToken",
-        "ecr-public:UploadLayerPart",
-        "ecr-public:InitiateLayerUpload",
-        "ecr-public:BatchCheckLayerAvailability",
-        "ecr-public:PutImage",
-        "sts:GetServiceBearerToken",
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchGetImage",
         "ecr:CompleteLayerUpload",
         "ecr:GetAuthorizationToken",
-        "ecr:UploadLayerPart",
+        "ecr:GetDownloadUrlForLayer",
         "ecr:InitiateLayerUpload",
-        "ecr:BatchCheckLayerAvailability",
-        "ecr:PutImage"
+        "ecr-public:BatchCheckLayerAvailability",
+        "ecr-public:CompleteLayerUpload",
+        "ecr-public:GetAuthorizationToken",
+        "ecr-public:InitiateLayerUpload",
+        "ecr-public:PutImage",
+        "ecr-public:UploadLayerPart",
+        "ecr:PutImage",
+        "ecr:UploadLayerPart",
+        "sts:GetServiceBearerToken"
       ],
       "Resource": "*"
     }
