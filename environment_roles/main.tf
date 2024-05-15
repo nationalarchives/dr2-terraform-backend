@@ -24,7 +24,7 @@ module "terraform_policy" {
 
 module "custodian_repo_filters" {
   source       = "../github_repository_filters"
-  repositories = [{ name : "tna-custodian", "default_branch" : "master" }]
+  repositories = [{ name : "tna-custodian", "branch" : "master" }]
   environments = ["dr2-intg", "dr2-staging", "dr2-prod", "dr2-mgmt"]
 }
 

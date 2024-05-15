@@ -6,6 +6,6 @@ locals {
     ]), local.repository_branch_filters)
   }
   repository_branch_filters = [
-    for repository in var.repositories : "repo:${var.organisation}/${repository.name}:ref:refs/heads/${repository.default_branch}"
+    for repository in var.repositories : "repo:${var.organisation}/${repository.name}:ref:refs/heads/${repository.branch}"
   ]
 }

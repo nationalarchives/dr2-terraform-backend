@@ -4,8 +4,8 @@ locals {
   environments                 = toset(["intg", "staging", "prod"])
   dev_notifications_channel_id = "C052LJASZ08"
   department_terraform_repositories = [
-    { name : "tna-custodian", default_branch : "master" },
-    { name : "tdr-aws-accounts", default_branch : "master" }
+    { name : "tna-custodian", branch : "master" },
+    { name : "tdr-aws-accounts", branch : "master" }
   ]
   department_terraform_github_environments = [
     "dr2-intg",
@@ -14,7 +14,7 @@ locals {
     "dr2-mgmt"
   ]
   dr2_terraform_repositories = [
-    { name : "dr2-terraform-environments" }
+    { name : "dr2-terraform-environments", branch = "*" }
   ]
   dr2_terraform_github_environments = [
     "intg",

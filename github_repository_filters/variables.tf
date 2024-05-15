@@ -4,7 +4,7 @@ variable "environments" {
 }
 
 variable "repositories" {
-  type = list(object({ name : string, default_branch : optional(string, "main") }))
+  type = list(object({ name : string, branch : optional(string, "main") }))
 }
 
 variable "organisation" {
