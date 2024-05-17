@@ -208,7 +208,9 @@ module "disaster_recovery_repository" {
   repository_name = "dr2-disaster-recovery"
   repository_policy = templatefile("${path.module}/templates/ecr/cross_account_repository_policy.json.tpl", {
     allowed_principals = jsonencode([
-      "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:user/intg-dr2-disaster-recovery"
+      "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:user/intg-dr2-disaster-recovery",
+      "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:user/staging-dr2-disaster-recovery",
+      "arn:aws:iam::${data.aws_ssm_parameter.prod_account_number.value}:user/prod-dr2-disaster-recovery"
     ]),
     account_number = data.aws_caller_identity.current.account_id
   })
