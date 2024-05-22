@@ -4,7 +4,7 @@ locals {
   environments                 = toset(["intg", "staging", "prod"])
   dev_notifications_channel_id = "C052LJASZ08"
   department_terraform_repositories = [
-    { name : "tna-custodian", branch : "master" },
+    { name : "tna-custodian", branch : "*" },
     { name : "tdr-aws-accounts", branch : "master" }
   ]
   department_terraform_github_environments = [
@@ -119,7 +119,8 @@ module "terraform_github_terraform_environments" {
     account_id = data.aws_caller_identity.current.account_id,
     repo_filters = jsonencode(concat(
       module.department_terraform_repository_filters.repository_environments["dr2-${each.key}"],
-      module.dr2_terraform_repository_filters.repository_environments[each.key]
+      module.dr2_terraform_repository_filters.repository_environments[each.key],
+      ["repo:nationalarchives/tna-custodian:pull_request"]
     ))
   })
   name = "MgmtDPGithubTerraformEnvironmentsRole${title(each.key)}"
