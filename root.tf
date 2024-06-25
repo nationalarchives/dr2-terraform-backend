@@ -120,7 +120,7 @@ module "terraform_github_terraform_environments" {
     repo_filters = jsonencode(concat(
       module.department_terraform_repository_filters.repository_environments["dr2-${each.key}"],
       module.dr2_terraform_repository_filters.repository_environments[each.key],
-      ["repo:nationalarchives/tna-custodian:pull_request"]
+      ["repo:nationalarchives/tna-custodian:pull_request", "repo:nationalarchives/tdr-aws-accounts:pull_request"]
     ))
   })
   name = "MgmtDPGithubTerraformEnvironmentsRole${title(each.key)}"
