@@ -345,10 +345,7 @@ module "enhanced_scanning_inspector_findings_alerts" {
 
 module "enhanced_scanning_inspector_initial_scan_alert" {
   source = "git::https://github.com/nationalarchives/da-terraform-modules//eventbridge_api_destination_rule"
-  event_pattern = templatefile("${path.module}/templates/eventbridge/generic_event_pattern.json.tpl", {
-    source      = "aws.inspector2",
-    detail_type = "Inspector2 Scan"
-  })
+  event_pattern = templatefile("${path.module}/templates/eventbridge/vulnerability_findings_event_pattern.json.tpl", {})
   name                = "mgmt-ecr-inspector-initial-scan"
   api_destination_arn = module.eventbridge_alarm_notifications_destination.api_destination_arn
   api_destination_input_transformer = {
