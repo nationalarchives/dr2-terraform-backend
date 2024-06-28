@@ -266,6 +266,8 @@ module "e2e_tests_repository" {
     ]),
     account_number = data.aws_caller_identity.current.account_id
   })
+  common_tags      = {}
+  image_source_url = "https://github.com/nationalarchives/dr2-e2e-tests"
 }
 
 module "disaster_recovery_repository" {
@@ -279,6 +281,8 @@ module "disaster_recovery_repository" {
     ]),
     account_number = data.aws_caller_identity.current.account_id
   })
+  common_tags      = {}
+  image_source_url = "https://github.com/nationalarchives/dr2-disaster-recovery"
 }
 
 module "image_deploy_role" {
