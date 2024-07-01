@@ -266,6 +266,8 @@ module "e2e_tests_repository" {
     ]),
     account_number = data.aws_caller_identity.current.account_id
   })
+  common_tags      = {}
+  image_source_url = "https://github.com/nationalarchives/dr2-e2e-tests"
 }
 
 module "disaster_recovery_repository" {
@@ -279,6 +281,8 @@ module "disaster_recovery_repository" {
     ]),
     account_number = data.aws_caller_identity.current.account_id
   })
+  common_tags      = {}
+  image_source_url = "https://github.com/nationalarchives/dr2-disaster-recovery"
 }
 
 module "image_deploy_role" {
@@ -344,11 +348,8 @@ module "enhanced_scanning_inspector_findings_alerts" {
 }
 
 module "enhanced_scanning_inspector_initial_scan_alert" {
-  source = "git::https://github.com/nationalarchives/da-terraform-modules//eventbridge_api_destination_rule"
-  event_pattern = templatefile("${path.module}/templates/eventbridge/generic_event_pattern.json.tpl", {
-    source      = "aws.inspector2",
-    detail_type = "Inspector2 Scan"
-  })
+  source              = "git::https://github.com/nationalarchives/da-terraform-modules//eventbridge_api_destination_rule"
+  event_pattern       = templatefile("${path.module}/templates/eventbridge/vulnerability_findings_event_pattern.json.tpl", {})
   name                = "mgmt-ecr-inspector-initial-scan"
   api_destination_arn = module.eventbridge_alarm_notifications_destination.api_destination_arn
   api_destination_input_transformer = {
