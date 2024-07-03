@@ -3,21 +3,6 @@
   "Id": "secure-transport-mgmt-dp-code-deploy",
   "Statement": [
     {
-      "Sid": "AllowSSLRequestsOnly",
-      "Effect": "Deny",
-      "Principal": "*",
-      "Action": "s3:*",
-      "Resource": [
-        "arn:aws:s3:::mgmt-dp-code-deploy",
-        "arn:aws:s3:::mgmt-dp-code-deploy/*"
-      ],
-      "Condition": {
-        "Bool": {
-          "aws:SecureTransport": "false"
-        }
-      }
-    },
-    {
       "Effect": "Allow",
       "Principal": {
         "AWS": [

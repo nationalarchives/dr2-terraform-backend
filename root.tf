@@ -65,8 +65,6 @@ module "terraform_config" {
 module "terraform_s3_bucket" {
   source                = "git::https://github.com/nationalarchives/da-terraform-modules.git//s3"
   bucket_name           = local.terraform_state_bucket_name
-  bucket_policy         = templatefile("${path.module}/templates/s3/s3_secure_transport_logging.json.tpl", { bucket_name = local.terraform_state_bucket_name })
-  logging_bucket_policy = templatefile("${path.module}/templates/s3/s3_secure_transport_logging.json.tpl", { bucket_name = "${local.terraform_state_bucket_name}-logs" })
 }
 
 module "da_terraform_dynamo" {
@@ -284,6 +282,37 @@ module "disaster_recovery_repository" {
   common_tags      = {}
   image_source_url = "https://github.com/nationalarchives/dr2-disaster-recovery"
 }
+
+module "disaster_recovery_builder_repository" {
+  source          = "git::https://github.com/nationalarchives/da-terraform-modules.git//ecr"
+  repository_name = "dr2-disaster-recovery-builder"
+  repository_policy = templatefile("${path.module}/templates/ecr/cross_account_repository_policy.json.tpl", {
+    allowed_principals = jsonencode([
+      "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:user/intg-dr2-disaster-recovery",
+      "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:user/staging-dr2-disaster-recovery",
+      "arn:aws:iam::${data.aws_ssm_parameter.prod_account_number.value}:user/prod-dr2-disaster-recovery"
+    ]),
+    account_number = data.aws_caller_identity.current.account_id
+  })
+  common_tags      = {}
+  image_source_url = "https://github.com/nationalarchives/dr2-disaster-recovery"
+}
+
+module "disaster_recovery_webapp_repository" {
+  source          = "git::https://github.com/nationalarchives/da-terraform-modules.git//ecr"
+  repository_name = "dr2-disaster-recovery-webapp"
+  repository_policy = templatefile("${path.module}/templates/ecr/cross_account_repository_policy.json.tpl", {
+    allowed_principals = jsonencode([
+      "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:user/intg-dr2-disaster-recovery",
+      "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:user/staging-dr2-disaster-recovery",
+      "arn:aws:iam::${data.aws_ssm_parameter.prod_account_number.value}:user/prod-dr2-disaster-recovery"
+    ]),
+    account_number = data.aws_caller_identity.current.account_id
+  })
+  common_tags      = {}
+  image_source_url = "https://github.com/nationalarchives/dr2-disaster-recovery"
+}
+
 
 module "image_deploy_role" {
   source = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_role"
