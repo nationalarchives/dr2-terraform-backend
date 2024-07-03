@@ -63,8 +63,8 @@ module "terraform_config" {
 }
 
 module "terraform_s3_bucket" {
-  source                = "git::https://github.com/nationalarchives/da-terraform-modules.git//s3"
-  bucket_name           = local.terraform_state_bucket_name
+  source      = "git::https://github.com/nationalarchives/da-terraform-modules.git//s3"
+  bucket_name = local.terraform_state_bucket_name
 }
 
 module "da_terraform_dynamo" {
