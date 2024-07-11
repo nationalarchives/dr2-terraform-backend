@@ -23,6 +23,7 @@
         "kms:*",
         "lambda:*",
         "logs:*",
+        "pipes:*",
         "route53:*",
         "securityhub:*",
         "ses:*",
