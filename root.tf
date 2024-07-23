@@ -36,7 +36,7 @@ locals {
 module "department_terraform_repository_filters" {
   source       = "./github_repository_filters"
   repositories = local.department_terraform_repositories
-  environments = local.department_terraform_github_environments
+  environments = flatten([local.department_terraform_github_environments, local.dr2_terraform_github_environments])
 }
 
 module "dr2_terraform_repository_filters" {
@@ -117,6 +117,7 @@ module "terraform_github_terraform_environments" {
     account_id = data.aws_caller_identity.current.account_id,
     repo_filters = jsonencode(concat(
       module.department_terraform_repository_filters.repository_environments["dr2-${each.key}"],
+      module.department_terraform_repository_filters.repository_environments[each.key],
       module.dr2_terraform_repository_filters.repository_environments[each.key],
       ["repo:nationalarchives/tna-custodian:pull_request", "repo:nationalarchives/tdr-aws-accounts:pull_request"]
     ))
