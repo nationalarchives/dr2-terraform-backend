@@ -23,9 +23,9 @@ locals {
     "sbox",
     "mgmt"
   ]
-  dr2_code_deploy_repositories  = [{ name : "dr2-ingest" }, { name : "dr2-ip-lock-checker" }]
+  dr2_code_deploy_repositories  = [{ name : "dr2-ingest" }, { name : "dr2-ip-lock-checker" }, { name : "dr2-ingest-cc-notification-handler" }]
   dr2_code_deploy_environments  = ["intg", "staging", "prod"]
-  dr2_image_deploy_repositories = [{ name : "dr2-e2e-tests" }, { name : "dr2-court-document-package-anonymiser" }, { name : "dr2-disaster-recovery" }]
+  dr2_image_deploy_repositories = [{ name : "dr2-e2e-tests" }, { name : "dr2-court-document-package-anonymiser" }, { name : "dr2-custodial-copy" }]
   environments_roles = {
     intg    = module.environment_roles_intg.terraform_role_arn
     staging = module.environment_roles_staging.terraform_role_arn
@@ -268,49 +268,49 @@ module "e2e_tests_repository" {
   image_source_url = "https://github.com/nationalarchives/dr2-e2e-tests"
 }
 
-module "disaster_recovery_repository" {
+module "custodial_copy_backend_repository" {
   source          = "git::https://github.com/nationalarchives/da-terraform-modules.git//ecr"
-  repository_name = "dr2-disaster-recovery"
+  repository_name = "dr2-custodial-copy-backend"
   repository_policy = templatefile("${path.module}/templates/ecr/cross_account_repository_policy.json.tpl", {
     allowed_principals = jsonencode([
-      "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:user/intg-dr2-disaster-recovery",
-      "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:user/staging-dr2-disaster-recovery",
-      "arn:aws:iam::${data.aws_ssm_parameter.prod_account_number.value}:user/prod-dr2-disaster-recovery"
+      "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:user/intg-dr2-custodial-copy",
+      "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:user/staging-dr2-custodial-copy",
+      "arn:aws:iam::${data.aws_ssm_parameter.prod_account_number.value}:user/prod-dr2-custodial-copy"
     ]),
     account_number = data.aws_caller_identity.current.account_id
   })
   common_tags      = {}
-  image_source_url = "https://github.com/nationalarchives/dr2-disaster-recovery"
+  image_source_url = "https://github.com/nationalarchives/dr2-custodial-copy"
 }
 
-module "disaster_recovery_builder_repository" {
+module "custodial_copy_db_builder_repository" {
   source          = "git::https://github.com/nationalarchives/da-terraform-modules.git//ecr"
-  repository_name = "dr2-disaster-recovery-builder"
+  repository_name = "dr2-custodial-copy-db-builder"
   repository_policy = templatefile("${path.module}/templates/ecr/cross_account_repository_policy.json.tpl", {
     allowed_principals = jsonencode([
-      "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:user/intg-dr2-disaster-recovery",
-      "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:user/staging-dr2-disaster-recovery",
-      "arn:aws:iam::${data.aws_ssm_parameter.prod_account_number.value}:user/prod-dr2-disaster-recovery"
+      "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:user/intg-dr2-custodial-copy",
+      "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:user/staging-dr2-custodial-copy",
+      "arn:aws:iam::${data.aws_ssm_parameter.prod_account_number.value}:user/prod-dr2-custodial-copy"
     ]),
     account_number = data.aws_caller_identity.current.account_id
   })
   common_tags      = {}
-  image_source_url = "https://github.com/nationalarchives/dr2-disaster-recovery"
+  image_source_url = "https://github.com/nationalarchives/dr2-custodial-copy"
 }
 
-module "disaster_recovery_webapp_repository" {
+module "custodial_copy_webapp_repository" {
   source          = "git::https://github.com/nationalarchives/da-terraform-modules.git//ecr"
-  repository_name = "dr2-disaster-recovery-webapp"
+  repository_name = "dr2-custodial-copy-webapp"
   repository_policy = templatefile("${path.module}/templates/ecr/cross_account_repository_policy.json.tpl", {
     allowed_principals = jsonencode([
-      "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:user/intg-dr2-disaster-recovery",
-      "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:user/staging-dr2-disaster-recovery",
-      "arn:aws:iam::${data.aws_ssm_parameter.prod_account_number.value}:user/prod-dr2-disaster-recovery"
+      "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:user/intg-dr2-custodial-copy",
+      "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:user/staging-dr2-custodial-copy",
+      "arn:aws:iam::${data.aws_ssm_parameter.prod_account_number.value}:user/prod-dr2-custodial-copy"
     ]),
     account_number = data.aws_caller_identity.current.account_id
   })
   common_tags      = {}
-  image_source_url = "https://github.com/nationalarchives/dr2-disaster-recovery"
+  image_source_url = "https://github.com/nationalarchives/dr2-custodial-copy"
 }
 
 
