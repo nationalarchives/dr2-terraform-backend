@@ -23,7 +23,7 @@ locals {
     "sbox",
     "mgmt"
   ]
-  dr2_code_deploy_repositories  = [{ name : "dr2-ingest" }, { name : "dr2-ip-lock-checker" }]
+  dr2_code_deploy_repositories  = [{ name : "dr2-ingest" }, { name : "dr2-ip-lock-checker" }, { name : "dr2-ingest-cc-notification-handler" }]
   dr2_code_deploy_environments  = ["intg", "staging", "prod"]
   dr2_image_deploy_repositories = [{ name : "dr2-e2e-tests" }, { name : "dr2-court-document-package-anonymiser" }, { name : "dr2-custodial-copy" }]
   environments_roles = {
@@ -268,9 +268,9 @@ module "e2e_tests_repository" {
   image_source_url = "https://github.com/nationalarchives/dr2-e2e-tests"
 }
 
-module "custodial_copy_repository" {
+module "custodial_copy_backend_repository" {
   source          = "git::https://github.com/nationalarchives/da-terraform-modules.git//ecr"
-  repository_name = "dr2-custodial-copy"
+  repository_name = "dr2-custodial-copy-backend"
   repository_policy = templatefile("${path.module}/templates/ecr/cross_account_repository_policy.json.tpl", {
     allowed_principals = jsonencode([
       "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:user/intg-dr2-custodial-copy",
@@ -283,9 +283,9 @@ module "custodial_copy_repository" {
   image_source_url = "https://github.com/nationalarchives/dr2-custodial-copy"
 }
 
-module "custodial_copy_builder_repository" {
+module "custodial_copy_db_builder_repository" {
   source          = "git::https://github.com/nationalarchives/da-terraform-modules.git//ecr"
-  repository_name = "dr2-custodial-copy-builder"
+  repository_name = "dr2-custodial-copy-db-builder"
   repository_policy = templatefile("${path.module}/templates/ecr/cross_account_repository_policy.json.tpl", {
     allowed_principals = jsonencode([
       "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:user/intg-dr2-custodial-copy",
