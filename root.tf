@@ -315,7 +315,7 @@ module "custodial_copy_webapp_repository" {
 
 module "custodial_copy_reindexer_repository" {
   source          = "git::https://github.com/nationalarchives/da-terraform-modules.git//ecr"
-  repository_name = "dr2-custodial-copy-reindexer"
+  repository_name = "dr2-custodial-copy-re-indexer"
   repository_policy = templatefile("${path.module}/templates/ecr/cross_account_repository_policy.json.tpl", {
     allowed_principals = jsonencode([
       "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:user/intg-dr2-custodial-copy",
