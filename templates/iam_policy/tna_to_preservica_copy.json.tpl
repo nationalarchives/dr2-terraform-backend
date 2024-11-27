@@ -27,6 +27,7 @@
         "datasync:CancelTaskExecution",
         "datasync:DescribeLocation*",
         "datasync:CreateTask",
+        "datasync:CreateLocationS3",
         "datasync:DescribeTask",
         "datasync:DescribeLocation*",
         "datasync:StartTaskExecution",

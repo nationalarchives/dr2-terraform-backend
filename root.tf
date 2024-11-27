@@ -1,5 +1,6 @@
 locals {
   terraform_state_bucket_name  = "mgmt-dp-terraform-state"
+  terraform_role_arns          = jsonencode([module.environment_roles_intg.terraform_role_arn, module.environment_roles_staging.terraform_role_arn, module.environment_roles_prod.terraform_role_arn])
   code_deploy_bucket_name      = "mgmt-dp-code-deploy"
   environments                 = toset(["intg", "staging", "prod"])
   dev_notifications_channel_id = "C052LJASZ08"
@@ -65,6 +66,9 @@ module "terraform_config" {
 module "terraform_s3_bucket" {
   source      = "git::https://github.com/nationalarchives/da-terraform-modules.git//s3"
   bucket_name = local.terraform_state_bucket_name
+  bucket_policy = templatefile("${path.module}/templates/s3/terraform_state_policy.json.tpl", {
+    terraform_role_arns = local.terraform_role_arns
+  })
 }
 
 module "da_terraform_dynamo" {
@@ -77,23 +81,10 @@ module "dp_terraform_dynamo" {
   source     = "git::https://github.com/nationalarchives/da-terraform-modules.git//dynamo"
   hash_key   = { type = "S", name = "LockID" }
   table_name = "mgmt-dp-terraform-state-lock"
-}
-
-module "terraform_github_repository_iam" {
-  source = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_role"
-  assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", {
-    account_id = data.aws_caller_identity.current.account_id,
-    repo_filters = jsonencode([
-      "repo:nationalarchives/dr2-terraform-github-repositories:pull_request",
-      "repo:nationalarchives/dr2-terraform-github-repositories:ref:refs/heads/main"
-    ])
+  resource_policy = templatefile("${path.module}/templates/dynamo/lock_table_policy.json.tpl", {
+    table_arn           = module.dp_terraform_dynamo.table_arn
+    terraform_role_arns = local.terraform_role_arns
   })
-  name = "MgmtDPTerraformGitHubRepositoriesRole"
-  policy_attachments = {
-    state_access_policy = module.terraform_github_repository_policy.policy_arn
-    ssm_policy          = "arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess"
-  }
-  tags = {}
 }
 
 module "terraform_github_repository_da_iam" {
@@ -110,44 +101,6 @@ module "terraform_github_repository_da_iam" {
   tags = {}
 }
 
-module "terraform_github_terraform_environments" {
-  for_each = local.environments
-  source   = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_role"
-  assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", {
-    account_id = data.aws_caller_identity.current.account_id,
-    repo_filters = jsonencode(concat(
-      module.department_terraform_repository_filters.repository_environments["dr2-${each.key}"],
-      module.dr2_terraform_repository_filters.repository_environments[each.key],
-      ["repo:nationalarchives/tna-custodian:pull_request", "repo:nationalarchives/tdr-aws-accounts:pull_request"]
-    ))
-  })
-  name = "MgmtDPGithubTerraformEnvironmentsRole${title(each.key)}"
-  policy_attachments = {
-    state_access_policy           = module.terraform_github_repository_policy.policy_arn
-    terraform_environments_policy = module.terraform_github_terraform_environments_policy[each.key].policy_arn
-  }
-  tags = {}
-}
-
-module "terraform_github_terraform_environments_policy" {
-  for_each = local.environments
-  source   = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_policy"
-  name     = "MgmtDPGithubTerraformEnvironmentsPolicy${each.key}"
-  policy_string = templatefile("./templates/iam_policy/terraform_mgmt_assume_role.json.tpl", {
-    terraform_role_arn               = local.environments_roles[each.key]
-    preservica_copy_role_intg_arn    = module.environment_roles_intg.copy_tna_to_preservica_role_arn[0]
-    preservica_copy_role_staging_arn = module.environment_roles_staging.copy_tna_to_preservica_role_arn[0]
-    preservica_copy_role_prod_arn    = module.environment_roles_prod.copy_tna_to_preservica_role_arn[0]
-    account_id                       = data.aws_caller_identity.current.account_id
-  })
-}
-
-module "terraform_github_repository_policy" {
-  source        = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_policy"
-  name          = "MgmtDPTerraformStateAccessPolicy"
-  policy_string = templatefile("${path.module}/templates/iam_policy/terraform_state_access.json.tpl", { bucket_name = local.terraform_state_bucket_name, dynamo_table_arn = module.dp_terraform_dynamo.table_arn })
-}
-
 module "terraform_da_github_repository_policy" {
   source        = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_policy"
   name          = "MgmtDATerraformGitHubRepositoriesPolicy"
@@ -158,49 +111,53 @@ module "environment_roles_intg" {
   providers = {
     aws = aws.intg
   }
-  source                        = "./environment_roles"
-  account_number                = data.aws_ssm_parameter.intg_account_number.value
-  environment                   = "intg"
-  management_account_number     = data.aws_caller_identity.current.account_id
-  terraform_external_id         = module.terraform_config.terraform_config["intg"]["terraform_external_id"]
-  terraform_github_role_arn     = module.terraform_github_terraform_environments["intg"].role_arn
-  management_developer_role_arn = data.aws_ssm_parameter.dev_admin_role.value
+  source                    = "./environment_roles"
+  account_number            = data.aws_ssm_parameter.intg_account_number.value
+  environment               = "intg"
+  management_account_number = data.aws_caller_identity.current.account_id
+  terraform_repository_filters = jsonencode(concat(
+    module.department_terraform_repository_filters.repository_environments["dr2-intg"],
+    module.dr2_terraform_repository_filters.repository_environments["intg"]
+  ))
 }
 
 module "environment_roles_staging" {
   providers = {
     aws = aws.staging
   }
-  source                        = "./environment_roles"
-  account_number                = data.aws_ssm_parameter.staging_account_number.value
-  environment                   = "staging"
-  management_account_number     = data.aws_caller_identity.current.account_id
-  terraform_external_id         = module.terraform_config.terraform_config["staging"]["terraform_external_id"]
-  terraform_github_role_arn     = module.terraform_github_terraform_environments["staging"].role_arn
-  management_developer_role_arn = data.aws_ssm_parameter.dev_admin_role.value
+  source                    = "./environment_roles"
+  account_number            = data.aws_ssm_parameter.staging_account_number.value
+  environment               = "staging"
+  management_account_number = data.aws_caller_identity.current.account_id
+  terraform_repository_filters = jsonencode(concat(
+    module.department_terraform_repository_filters.repository_environments["dr2-staging"],
+    module.dr2_terraform_repository_filters.repository_environments["staging"]
+  ))
 }
 
 module "environment_roles_prod" {
   providers = {
     aws = aws.prod
   }
-  source                        = "./environment_roles"
-  account_number                = data.aws_ssm_parameter.prod_account_number.value
-  environment                   = "prod"
-  management_account_number     = data.aws_caller_identity.current.account_id
-  terraform_external_id         = module.terraform_config.terraform_config["prod"]["terraform_external_id"]
-  terraform_github_role_arn     = module.terraform_github_terraform_environments["prod"].role_arn
-  management_developer_role_arn = data.aws_ssm_parameter.dev_admin_role.value
+  source                    = "./environment_roles"
+  account_number            = data.aws_ssm_parameter.prod_account_number.value
+  environment               = "prod"
+  management_account_number = data.aws_caller_identity.current.account_id
+  terraform_repository_filters = jsonencode(concat(
+    module.department_terraform_repository_filters.repository_environments["dr2-prod"],
+    module.dr2_terraform_repository_filters.repository_environments["prod"]
+  ))
 }
 
 module "environment_roles_mgmt" {
-  source                        = "./environment_roles"
-  account_number                = data.aws_caller_identity.current.account_id
-  environment                   = "mgmt"
-  management_account_number     = data.aws_caller_identity.current.account_id
-  terraform_external_id         = module.terraform_config.terraform_config["mgmt"]["terraform_external_id"]
-  terraform_github_role_arn     = module.terraform_github_repository_iam.role_arn
-  management_developer_role_arn = data.aws_ssm_parameter.dev_admin_role.value
+  source                    = "./environment_roles"
+  account_number            = data.aws_caller_identity.current.account_id
+  environment               = "mgmt"
+  management_account_number = data.aws_caller_identity.current.account_id
+  terraform_repository_filters = jsonencode(concat(
+    module.department_terraform_repository_filters.repository_environments["dr2-mgmt"],
+    module.dr2_terraform_repository_filters.repository_environments["mgmt"]
+  ))
 }
 
 module "code_deploy_bucket" {
@@ -252,20 +209,6 @@ resource "aws_ecrpublic_repository" "judgment_package_anonymiser" {
 
 resource "aws_ecr_registry_scanning_configuration" "enhanced_scanning" {
   scan_type = "ENHANCED"
-}
-
-module "e2e_tests_repository" {
-  source          = "git::https://github.com/nationalarchives/da-terraform-modules.git//ecr"
-  repository_name = "e2e-tests"
-  repository_policy = templatefile("${path.module}/templates/ecr/cross_account_repository_policy.json.tpl", {
-    allowed_principals = jsonencode([
-      "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:role/intg-dr2-e2e-tests-execution-role",
-      "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:role/staging-dr2-e2e-tests-execution-role"
-    ]),
-    account_number = data.aws_caller_identity.current.account_id
-  })
-  common_tags      = {}
-  image_source_url = "https://github.com/nationalarchives/dr2-e2e-tests"
 }
 
 module "custodial_copy_backend_repository" {
