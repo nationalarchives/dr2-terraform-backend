@@ -84,9 +84,9 @@ module "copy_tna_to_preservica_policy" {
 }
 
 module "business_analyst_policy" {
-  count  = var.environment == "intg" ? 1 : 0
-  source = "git::https://github.com/nationalarchives/da-terraform-modules//iam_policy"
-  name   = "AWSSSO_DABusinessAnalyst"
+  count         = var.environment == "intg" ? 1 : 0
+  source        = "git::https://github.com/nationalarchives/da-terraform-modules//iam_policy"
+  name          = "AWSSSO_DABusinessAnalyst"
   policy_string = templatefile("./templates/iam_policy/business_analyst_policy.json.tpl", { account_id = var.account_number, environment = var.environment })
 }
 
