@@ -7,9 +7,13 @@ locals {
 }
 
 module "terraform_role" {
-  source             = "git::https://github.com/nationalarchives/da-terraform-modules//iam_role"
-  assume_role_policy = templatefile("./templates/iam_role/account_assume_role.json.tpl", { account_id = var.management_account_number, external_id = var.terraform_external_id })
-  name               = "${title(var.environment)}TerraformRole"
+  source = "git::https://github.com/nationalarchives/da-terraform-modules//iam_role"
+  assume_role_policy = templatefile("./templates/iam_role/account_assume_role.json.tpl", {
+    admin_role_arn = data.aws_ssm_parameter.dev_admin_role.value
+    account_id     = var.account_number,
+    repo_filters   = var.terraform_repository_filters
+  })
+  name = "${title(var.environment)}TerraformRole"
   policy_attachments = {
     terraform_policy = module.terraform_policy.policy_arn
   }
@@ -19,7 +23,7 @@ module "terraform_role" {
 module "terraform_policy" {
   source        = "git::https://github.com/nationalarchives/da-terraform-modules//iam_policy"
   name          = "${title(var.environment)}TerraformPolicy"
-  policy_string = templatefile("./templates/iam_policy/terraform_policy.json.tpl", { account_id = var.account_number, environment = var.environment, environment_title = title(var.environment) })
+  policy_string = templatefile("./templates/iam_policy/terraform_policy.json.tpl", { account_id = var.account_number, environment = var.environment, environment_title = title(var.environment), management_account_id = var.management_account_number })
 }
 
 module "custodian_repo_filters" {
@@ -59,8 +63,8 @@ module "copy_tna_to_preservica_role" {
   assume_role_policy = templatefile("./templates/iam_role/tna_to_preservica_trust_policy.json.tpl", {
     terraform_role_arn        = module.terraform_role.role_arn,
     account_id                = data.aws_caller_identity.current.account_id,
-    admin_role_arn            = var.management_developer_role_arn
-    terraform_github_role_arn = var.terraform_github_role_arn
+    admin_role_arn            = data.aws_ssm_parameter.dev_admin_role.value
+    terraform_github_role_arn = module.terraform_role.role_arn
     title_environment         = title(var.environment)
     environment               = var.environment
   })
@@ -97,3 +101,4 @@ resource "aws_cloudwatch_log_group" "terraform_plan_log_group" {
 data "aws_ssm_parameter" "dev_admin_role" {
   name = "/${var.environment}/developer_role"
 }
+
