@@ -25,6 +25,7 @@
         "logs:*",
         "pipes:*",
         "route53:*",
+        "route53resolver:*",
         "securityhub:*",
         "ses:*",
         "s3:*",
