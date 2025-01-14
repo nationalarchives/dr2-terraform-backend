@@ -57,36 +57,6 @@ resource "aws_iam_openid_connect_provider" "openid_provider" {
   url             = "https://token.actions.githubusercontent.com"
 }
 
-module "copy_tna_to_preservica_role" {
-  count  = var.environment == "mgmt" ? 0 : 1
-  source = "git::https://github.com/nationalarchives/da-terraform-modules//iam_role"
-  assume_role_policy = templatefile("./templates/iam_role/tna_to_preservica_trust_policy.json.tpl", {
-    terraform_role_arn        = module.terraform_role.role_arn,
-    account_id                = data.aws_caller_identity.current.account_id,
-    admin_role_arn            = data.aws_ssm_parameter.dev_admin_role.value
-    terraform_github_role_arn = module.terraform_role.role_arn
-    title_environment         = title(var.environment)
-    environment               = var.environment
-  })
-  name = local.tna_to_preservica_role_name
-  policy_attachments = {
-    copy_tna_to_preservica_policy = module.copy_tna_to_preservica_policy[count.index].policy_arn
-  }
-  tags = {}
-}
-
-module "copy_tna_to_preservica_policy" {
-  count  = var.environment == "mgmt" ? 0 : 1
-  source = "git::https://github.com/nationalarchives/da-terraform-modules//iam_policy"
-  name   = "${var.environment}-tna-to-preservica-ingest-s3-${var.environment == "prod" ? "tna" : "tnatest"}-policy"
-  policy_string = templatefile("./templates/iam_policy/tna_to_preservica_copy.json.tpl", {
-    account_id                       = data.aws_caller_identity.current.account_id
-    preservica_tenant                = local.preservica_tenant
-    ingest_staging_cache_bucket_name = "${var.environment}-dr2-ingest-staging-cache",
-    tna_to_preservica_role_arn       = local.tna_to_preservica_role_arn
-  })
-}
-
 module "business_analyst_policy" {
   count         = var.environment == "intg" ? 1 : 0
   source        = "git::https://github.com/nationalarchives/da-terraform-modules//iam_policy"
