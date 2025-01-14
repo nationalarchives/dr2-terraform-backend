@@ -19,7 +19,6 @@
         "events:*",
         "glue:*",
         "guardduty:*",
-        "iam:*",
         "kms:*",
         "lambda:*",
         "logs:*",
@@ -44,11 +43,20 @@
       "Resource": "*"
     },
     {
+      "Action": [
+        "iam:PassRole"
+      ],
+      "Effect": "Deny",
+      "Resource": "*"
+    },
+    {
       "Effect": "Allow",
       "Action": [
         "iam:*"
       ],
       "Resource": [
+        "arn:aws:iam::${account_id}:group/${environment}-dr2-custodial-copy",
+        "arn:aws:iam::${account_id}:user/${environment}-dr2-custodial-copy",
         "arn:aws:iam::${account_id}:role/${environment}*",
         "arn:aws:iam::${account_id}:role/${environment_title}*",
         "arn:aws:iam::${account_id}:role/aws-service-role*",
