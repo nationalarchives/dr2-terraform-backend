@@ -43,13 +43,6 @@
       "Resource": "*"
     },
     {
-      "Action": [
-        "iam:PassRole"
-      ],
-      "Effect": "Deny",
-      "Resource": "*"
-    },
-    {
       "Effect": "Allow",
       "Action": [
         "iam:*"
