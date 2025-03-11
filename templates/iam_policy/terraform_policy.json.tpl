@@ -52,6 +52,7 @@
         "arn:aws:iam::${account_id}:user/${environment}-dr2-custodial-copy",
         "arn:aws:iam::${account_id}:role/${environment}*",
         "arn:aws:iam::${account_id}:role/${environment_title}*",
+        "arn:aws:iam::${account_id}:role/org-wiz-access-role",
         "arn:aws:iam::${account_id}:role/aws-service-role*",
         "arn:aws:iam::${account_id}:policy/${environment}*",
         "arn:aws:iam::${account_id}:policy/${environment_title}*",
