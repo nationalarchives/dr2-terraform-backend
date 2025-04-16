@@ -61,10 +61,6 @@
     },
     {
       "Action": [
-        "dynamodb:DescribeTable",
-        "dynamodb:DeleteItem",
-        "dynamodb:GetItem",
-        "dynamodb:PutItem",
         "s3:GetObject",
         "s3:ListBucket",
         "s3:PutObject"
@@ -72,8 +68,16 @@
       "Effect": "Allow",
       "Resource": [
         "arn:aws:s3:::mgmt-dp-terraform-state",
-        "arn:aws:s3:::mgmt-dp-terraform-state/*",
-        "arn:aws:dynamodb:eu-west-2:${management_account_id}:table/mgmt-dp-terraform-state-lock"
+        "arn:aws:s3:::mgmt-dp-terraform-state/*"
+      ]
+    },
+    {
+      "Action": [
+        "s3:DeleteObject"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:s3:::mgmt-dp-terraform-state/env:/${environment}/terraform.state.tflock"
       ]
     }
   ]

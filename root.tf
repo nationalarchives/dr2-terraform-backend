@@ -67,7 +67,9 @@ module "terraform_s3_bucket" {
   source      = "git::https://github.com/nationalarchives/da-terraform-modules.git//s3"
   bucket_name = local.terraform_state_bucket_name
   bucket_policy = templatefile("${path.module}/templates/s3/terraform_state_policy.json.tpl", {
-    terraform_role_arns = local.terraform_role_arns
+    intg_role_arn    = module.environment_roles_intg.terraform_role_arn
+    staging_role_arn = module.environment_roles_staging.terraform_role_arn
+    prod_role_arn    = module.environment_roles_prod.terraform_role_arn
   })
 }
 
@@ -75,16 +77,6 @@ module "da_terraform_dynamo" {
   source     = "git::https://github.com/nationalarchives/da-terraform-modules.git//dynamo"
   hash_key   = { type = "S", name = "LockID" }
   table_name = "mgmt-da-terraform-state-lock"
-}
-
-module "dp_terraform_dynamo" {
-  source     = "git::https://github.com/nationalarchives/da-terraform-modules.git//dynamo"
-  hash_key   = { type = "S", name = "LockID" }
-  table_name = "mgmt-dp-terraform-state-lock"
-  resource_policy = templatefile("${path.module}/templates/dynamo/lock_table_policy.json.tpl", {
-    table_arn           = module.dp_terraform_dynamo.table_arn
-    terraform_role_arns = local.terraform_role_arns
-  })
 }
 
 module "terraform_github_repository_da_iam" {
