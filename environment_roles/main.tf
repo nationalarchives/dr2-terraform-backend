@@ -36,7 +36,7 @@ module "custodian_role" {
   source = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_role"
   assume_role_policy = templatefile("${path.root}/templates/iam_role/github_assume_role.json.tpl", {
     account_id   = data.aws_caller_identity.current.account_id,
-    repo_filters = jsonencode(concat(module.custodian_repo_filters.repository_environments["dr2-${var.environment}"], ["repo:nationalarchives/tna-custodian:pull_request"]))
+    repo_filters = jsonencode(module.custodian_repo_filters.repository_environments["dr2-${var.environment}"])
   })
   name = "${title(var.environment)}DR2GithubActionsCustodianDeployRole"
   policy_attachments = {
