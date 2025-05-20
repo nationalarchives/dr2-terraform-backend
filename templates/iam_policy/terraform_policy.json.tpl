@@ -9,6 +9,7 @@
         "athena:*",
         "cloudtrail:*",
         "cloudwatch:*",
+        "cloudfront:*",
         "config:*",
         "datasync:*",
         "dynamodb:*",
