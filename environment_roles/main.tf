@@ -8,6 +8,7 @@ locals {
 
 module "terraform_role" {
   source = "git::https://github.com/nationalarchives/da-terraform-modules//iam_role"
+  count  = var.environment == "mgmt" ? 0 : 1
   assume_role_policy = templatefile("./templates/iam_role/account_assume_role.json.tpl", {
     admin_role_arn = data.aws_ssm_parameter.dev_admin_role.value
     account_id     = var.account_number,
