@@ -9,6 +9,6 @@ locals {
     for repository in var.repositories : flatten([
       "repo:${var.organisation}/${repository.name}:ref:refs/heads/${repository.branch}",
       "repo:${var.organisation}/${repository.name}:pull_request"
-      ])
+    ])
   ]
 }
