@@ -15,7 +15,7 @@ locals {
     "dr2-mgmt"
   ]
   dr2_terraform_repositories = [
-    { name : "dr2-terraform-environments", branch = "*" }
+    { name : "dr2-ingest", branch = "*" }
   ]
   dr2_terraform_github_environments = [
     "intg",
