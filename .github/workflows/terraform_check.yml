@@ -20,7 +20,7 @@ jobs:
           message: ":warning: Secrets found in repository dr2-terraform-backend"
           slack-url: ${{ secrets.SLACK_WEBHOOK }}
       - name: Configure AWS credentials for S3 state file access
-        uses: aws-actions/configure-aws-credentials@06083b756457410befa79ac62f8e6daf35a41869
+        uses: aws-actions/configure-aws-credentials@5dc01dbae8049305b926bd46652e529e1d3c5285
         with:
           role-to-assume: arn:aws:iam::${{ secrets.MANAGEMENT_ACCOUNT }}:role/MgmtDPBootstrapTerraformGitHubRepositoriesRole
           aws-region: eu-west-2
