@@ -23,6 +23,7 @@
         "kms:*",
         "lambda:*",
         "logs:*",
+        "organizations:DescribeOrganization",
         "pipes:*",
         "route53:*",
         "route53resolver:*",
@@ -57,6 +58,7 @@
         "arn:aws:iam::${account_id}:role/aws-service-role*",
         "arn:aws:iam::${account_id}:policy/${environment}*",
         "arn:aws:iam::${account_id}:policy/${environment_title}*",
+        "arn:aws:iam::${account_id}:policy/AWSSSO_DAArchivist",
         "arn:aws:iam::${account_id}:instance-profile/${environment}*"
       ]
     },
