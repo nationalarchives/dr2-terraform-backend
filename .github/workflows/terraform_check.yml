@@ -12,7 +12,7 @@ jobs:
         with:
           submodules: recursive
           token: ${{ secrets.WORKFLOW_TOKEN }}
-      - uses: hashicorp/setup-terraform@92e4d08fe1d24283952afa28216efa8f4ed5aeab
+      - uses: hashicorp/setup-terraform@93d5a27adc7ac26085422db72568ae486f091042
       - uses: nationalarchives/dr2-github-actions/.github/actions/run-git-secrets@917201e254f112ff041b952dae76ef767cae7378
       - uses: nationalarchives/dr2-github-actions/.github/actions/slack-send@917201e254f112ff041b952dae76ef767cae7378
         if: failure()
@@ -20,7 +20,7 @@ jobs:
           message: ":warning: Secrets found in repository dr2-terraform-backend"
           slack-url: ${{ secrets.SLACK_WEBHOOK }}
       - name: Configure AWS credentials for S3 state file access
-        uses: aws-actions/configure-aws-credentials@4c2b9cc816c86555b61460789ac95da17d7e829b
+        uses: aws-actions/configure-aws-credentials@6ebc88dc2e550247a73cd8cbf189bbc7fd61c3b4
         with:
           role-to-assume: arn:aws:iam::${{ secrets.MANAGEMENT_ACCOUNT }}:role/MgmtDPBootstrapTerraformGitHubRepositoriesRole
           aws-region: eu-west-2
