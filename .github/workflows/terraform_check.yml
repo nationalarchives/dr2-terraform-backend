@@ -12,7 +12,7 @@ jobs:
         with:
           submodules: recursive
           token: ${{ secrets.WORKFLOW_TOKEN }}
-      - uses: hashicorp/setup-terraform@93d5a27adc7ac26085422db72568ae486f091042
+      - uses: hashicorp/setup-terraform@dcc3150f6037c0405dd84cb44d1d91ebbaa96514
       - uses: nationalarchives/dr2-github-actions/.github/actions/run-git-secrets@917201e254f112ff041b952dae76ef767cae7378
       - uses: nationalarchives/dr2-github-actions/.github/actions/slack-send@917201e254f112ff041b952dae76ef767cae7378
         if: failure()
