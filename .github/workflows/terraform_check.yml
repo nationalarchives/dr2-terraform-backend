@@ -8,11 +8,11 @@ jobs:
   terraform-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           submodules: recursive
           token: ${{ secrets.WORKFLOW_TOKEN }}
-      - uses: hashicorp/setup-terraform@93d5a27adc7ac26085422db72568ae486f091042
+      - uses: hashicorp/setup-terraform@dcc3150f6037c0405dd84cb44d1d91ebbaa96514
       - uses: nationalarchives/dr2-github-actions/.github/actions/run-git-secrets@917201e254f112ff041b952dae76ef767cae7378
       - uses: nationalarchives/dr2-github-actions/.github/actions/slack-send@917201e254f112ff041b952dae76ef767cae7378
         if: failure()
@@ -20,7 +20,7 @@ jobs:
           message: ":warning: Secrets found in repository dr2-terraform-backend"
           slack-url: ${{ secrets.SLACK_WEBHOOK }}
       - name: Configure AWS credentials for S3 state file access
-        uses: aws-actions/configure-aws-credentials@6ebc88dc2e550247a73cd8cbf189bbc7fd61c3b4
+        uses: aws-actions/configure-aws-credentials@e1b30a229e9414108545ddc70b41cf676c68a23f
         with:
           role-to-assume: arn:aws:iam::${{ secrets.MANAGEMENT_ACCOUNT }}:role/MgmtDPBootstrapTerraformGitHubRepositoriesRole
           aws-region: eu-west-2
