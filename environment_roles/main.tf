@@ -65,10 +65,6 @@ module "business_analyst_policy" {
   policy_string = templatefile("./templates/iam_policy/business_analyst_policy.json.tpl", { account_id = var.account_number, environment = var.environment })
 }
 
-resource "aws_cloudwatch_log_group" "terraform_plan_log_group" {
-  name = "terraform-plan-outputs-${var.environment}"
-}
-
 data "aws_ssm_parameter" "dev_admin_role" {
   name = "/${var.environment}/developer_role"
 }
