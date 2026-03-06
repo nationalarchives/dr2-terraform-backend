@@ -287,9 +287,11 @@ module "image_deploy_role" {
 }
 
 module "image_deploy_policy" {
-  source        = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_policy"
-  name          = "MgmtDPGithubImageDeployPolicy"
-  policy_string = templatefile("${path.module}/templates/iam_policy/image_deploy.json.tpl", {})
+  source = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_policy"
+  name   = "MgmtDPGithubImageDeployPolicy"
+  policy_string = templatefile("${path.module}/templates/iam_policy/image_deploy.json.tpl", {
+    event_bus_arn = "arn:aws:events:${data.aws_region.current_region.name}:${data.aws_caller_identity.current.account_id}:event-bus/default"
+  })
 }
 
 module "eventbridge_alarm_notifications_destination" {
@@ -348,6 +350,22 @@ module "enhanced_scanning_inspector_initial_scan_alert" {
     input_template = templatefile("${path.module}/templates/eventbridge/slack_message_input_template.json.tpl", {
       channel_id   = local.dev_notifications_channel_id
       slackMessage = ":alert-noflash-slow: Initial scan complete for `<repositoryName>` <totalFindings> vulnerabilities found"
+    })
+  }
+}
+
+module "dev_slack_message_eventbridge_rule" {
+  source              = "git::https://github.com/nationalarchives/da-terraform-modules//eventbridge_api_destination_rule"
+  api_destination_arn = module.eventbridge_alarm_notifications_destination.api_destination_arn
+  event_pattern       = templatefile("${path.module}/templates/eventbridge/custom_detail_type_event_pattern.json.tpl", { detail_type = "DR2DevMessage" })
+  name                = "mgmt-dr2-eventbridge-dev-slack-message"
+  api_destination_input_transformer = {
+    input_paths = {
+      "slackMessage" = "$.detail.slackMessage"
+    }
+    input_template = templatefile("${path.module}/templates/eventbridge/slack_message_input_template.json.tpl", {
+      channel_id   = local.dev_notifications_channel_id
+      slackMessage = "<slackMessage>"
     })
   }
 }

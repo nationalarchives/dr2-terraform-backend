@@ -21,6 +21,12 @@
         "sts:GetServiceBearerToken"
       ],
       "Resource": "*"
+    },
+    {
+      "Sid": "PutEvents",
+      "Effect": "Allow",
+      "Action": "events:PutEvents",
+      "Resource": "${event_bus_arn}"
     }
   ]
 }
