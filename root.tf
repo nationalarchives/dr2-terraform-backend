@@ -369,3 +369,28 @@ module "dev_slack_message_eventbridge_rule" {
     })
   }
 }
+
+module "library_put_events_role" {
+  source = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_role"
+  assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", {
+    account_id = data.aws_caller_identity.current.account_id,
+    repo_filters = jsonencode([
+      "repo:nationalarchives/da-aws-clients:ref:refs/heads/main",
+      "repo:nationalarchives/dr2-preservica-client:ref:refs/heads/main",
+      "repo:nationalarchives/da-aws-clients:ref:refs/heads/DR2-2713-remove-dependency-from-aws-clients"
+    ])
+  })
+  name = "mgmt-library-put-events-role"
+  policy_attachments = {
+    image_deploy_policy = module.library_put_events_policy.policy_arn
+  }
+  tags = {}
+}
+
+module "library_put_events_policy" {
+  source = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_policy"
+  name   = "mgmt-library-put-events-"
+  policy_string = templatefile("${path.module}/templates/iam_policy/put_event.json.tpl", {
+    event_bus_arn = "arn:aws:events:${data.aws_region.current_region.name}:${data.aws_caller_identity.current.account_id}:event-bus/default"
+  })
+}
