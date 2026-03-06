@@ -63,12 +63,6 @@ module "terraform_s3_bucket" {
   })
 }
 
-module "da_terraform_dynamo" {
-  source     = "git::https://github.com/nationalarchives/da-terraform-modules.git//dynamo"
-  hash_key   = { type = "S", name = "LockID" }
-  table_name = "mgmt-da-terraform-state-lock"
-}
-
 module "terraform_github_repository_da_iam" {
   source = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_role"
   assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", {
