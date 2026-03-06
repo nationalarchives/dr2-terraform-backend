@@ -4,10 +4,6 @@ locals {
   code_deploy_bucket_name      = "mgmt-dp-code-deploy"
   environments                 = toset(["intg", "staging", "prod"])
   dev_notifications_channel_id = "C052LJASZ08"
-  department_terraform_repositories = [
-    { name : "tna-custodian", branch : "*" },
-    { name : "tdr-aws-accounts", branch : "master" }
-  ]
   department_terraform_github_environments = [
     "dr2-intg",
     "dr2-staging",
@@ -32,12 +28,6 @@ locals {
     staging = module.environment_roles_staging.terraform_role_arn
     prod    = module.environment_roles_prod.terraform_role_arn
   }
-}
-
-module "department_terraform_repository_filters" {
-  source       = "./github_repository_filters"
-  repositories = local.department_terraform_repositories
-  environments = local.department_terraform_github_environments
 }
 
 module "dr2_terraform_repository_filters" {
@@ -108,7 +98,6 @@ module "environment_roles_intg" {
   environment               = "intg"
   management_account_number = data.aws_caller_identity.current.account_id
   terraform_repository_filters = jsonencode(concat(
-    module.department_terraform_repository_filters.repository_environments["dr2-intg"],
     module.dr2_terraform_repository_filters.repository_environments["intg"]
   ))
 }
@@ -122,7 +111,6 @@ module "environment_roles_staging" {
   environment               = "staging"
   management_account_number = data.aws_caller_identity.current.account_id
   terraform_repository_filters = jsonencode(concat(
-    module.department_terraform_repository_filters.repository_environments["dr2-staging"],
     module.dr2_terraform_repository_filters.repository_environments["staging"]
   ))
 }
@@ -136,7 +124,6 @@ module "environment_roles_prod" {
   environment               = "prod"
   management_account_number = data.aws_caller_identity.current.account_id
   terraform_repository_filters = jsonencode(concat(
-    module.department_terraform_repository_filters.repository_environments["dr2-prod"],
     module.dr2_terraform_repository_filters.repository_environments["prod"]
   ))
 }
@@ -147,7 +134,6 @@ module "environment_roles_mgmt" {
   environment               = "mgmt"
   management_account_number = data.aws_caller_identity.current.account_id
   terraform_repository_filters = jsonencode(concat(
-    module.department_terraform_repository_filters.repository_environments["dr2-mgmt"],
     module.dr2_terraform_repository_filters.repository_environments["mgmt"]
   ))
 }
