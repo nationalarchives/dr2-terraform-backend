@@ -24,9 +24,9 @@ locals {
     "sbox",
     "mgmt"
   ]
-  dr2_code_deploy_repositories  = [{ name : "dr2-ingest" }, { name : "dr2-ip-lock-checker" }, { name : "dr2-ingest-cc-notification-handler" }]
+  dr2_code_deploy_repositories  = [{ name : "dr2-ingest" }]
   dr2_code_deploy_environments  = ["intg", "staging", "prod"]
-  dr2_image_deploy_repositories = [{ name : "dr2-e2e-tests" }, { name : "dr2-court-document-package-anonymiser" }, { name : "dr2-custodial-copy" }]
+  dr2_image_deploy_repositories = [{ name : "dr2-custodial-copy" }]
   environments_roles = {
     intg    = module.environment_roles_intg.terraform_role_arn
     staging = module.environment_roles_staging.terraform_role_arn
@@ -388,7 +388,7 @@ module "library_put_events_role" {
 
 module "library_put_events_policy" {
   source = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_policy"
-  name   = "mgmt-library-put-events-"
+  name   = "mgmt-library-put-events-policy"
   policy_string = templatefile("${path.module}/templates/iam_policy/put_event.json.tpl", {
     event_bus_arn = "arn:aws:events:${data.aws_region.current_region.name}:${data.aws_caller_identity.current.account_id}:event-bus/default"
   })
