@@ -376,8 +376,7 @@ module "library_put_events_role" {
     account_id = data.aws_caller_identity.current.account_id,
     repo_filters = jsonencode([
       "repo:nationalarchives/da-aws-clients:ref:refs/heads/main",
-      "repo:nationalarchives/dr2-preservica-client:ref:refs/heads/main",
-      "repo:nationalarchives/da-aws-clients:ref:refs/heads/DR2-2713-remove-dependency-from-aws-clients"
+      "repo:nationalarchives/dr2-preservica-client:ref:refs/heads/main"
     ])
   })
   name = "mgmt-library-put-events-role"
