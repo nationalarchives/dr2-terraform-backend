@@ -20,9 +20,9 @@ locals {
     "sbox",
     "mgmt"
   ]
-  dr2_code_deploy_repositories  = [{ name : "dr2-ingest" }, { name : "dr2-ip-lock-checker" }, { name : "dr2-ingest-cc-notification-handler" }]
+  dr2_code_deploy_repositories  = [{ name : "dr2-ingest" }]
   dr2_code_deploy_environments  = ["intg", "staging", "prod"]
-  dr2_image_deploy_repositories = [{ name : "dr2-e2e-tests" }, { name : "dr2-court-document-package-anonymiser" }, { name : "dr2-custodial-copy" }]
+  dr2_image_deploy_repositories = [{ name : "dr2-custodial-copy" }]
   environments_roles = {
     intg    = module.environment_roles_intg.terraform_role_arn
     staging = module.environment_roles_staging.terraform_role_arn
@@ -247,9 +247,11 @@ module "image_deploy_role" {
 }
 
 module "image_deploy_policy" {
-  source        = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_policy"
-  name          = "MgmtDPGithubImageDeployPolicy"
-  policy_string = templatefile("${path.module}/templates/iam_policy/image_deploy.json.tpl", {})
+  source = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_policy"
+  name   = "MgmtDPGithubImageDeployPolicy"
+  policy_string = templatefile("${path.module}/templates/iam_policy/image_deploy.json.tpl", {
+    event_bus_arn = "arn:aws:events:${data.aws_region.current_region.name}:${data.aws_caller_identity.current.account_id}:event-bus/default"
+  })
 }
 
 module "eventbridge_alarm_notifications_destination" {
@@ -310,4 +312,44 @@ module "enhanced_scanning_inspector_initial_scan_alert" {
       slackMessage = ":alert-noflash-slow: Initial scan complete for `<repositoryName>` <totalFindings> vulnerabilities found"
     })
   }
+}
+
+module "dev_slack_message_eventbridge_rule" {
+  source              = "git::https://github.com/nationalarchives/da-terraform-modules//eventbridge_api_destination_rule"
+  api_destination_arn = module.eventbridge_alarm_notifications_destination.api_destination_arn
+  event_pattern       = templatefile("${path.module}/templates/eventbridge/custom_detail_type_event_pattern.json.tpl", { detail_type = "DR2DevMessage" })
+  name                = "mgmt-dr2-eventbridge-dev-slack-message"
+  api_destination_input_transformer = {
+    input_paths = {
+      "slackMessage" = "$.detail.slackMessage"
+    }
+    input_template = templatefile("${path.module}/templates/eventbridge/slack_message_input_template.json.tpl", {
+      channel_id   = local.dev_notifications_channel_id
+      slackMessage = "<slackMessage>"
+    })
+  }
+}
+
+module "library_put_events_role" {
+  source = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_role"
+  assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", {
+    account_id = data.aws_caller_identity.current.account_id,
+    repo_filters = jsonencode([
+      "repo:nationalarchives/da-aws-clients:ref:refs/heads/main",
+      "repo:nationalarchives/dr2-preservica-client:ref:refs/heads/main"
+    ])
+  })
+  name = "mgmt-library-put-events-role"
+  policy_attachments = {
+    image_deploy_policy = module.library_put_events_policy.policy_arn
+  }
+  tags = {}
+}
+
+module "library_put_events_policy" {
+  source = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_policy"
+  name   = "mgmt-library-put-events-policy"
+  policy_string = templatefile("${path.module}/templates/iam_policy/put_event.json.tpl", {
+    event_bus_arn = "arn:aws:events:${data.aws_region.current_region.name}:${data.aws_caller_identity.current.account_id}:event-bus/default"
+  })
 }

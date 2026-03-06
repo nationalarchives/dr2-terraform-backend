@@ -1,5 +1,7 @@
 data "aws_caller_identity" "current" {}
 
+data "aws_region" "current_region" {}
+
 data "aws_ssm_parameter" "intg_account_number" {
   name = "/mgmt/intg_account_number"
 }
