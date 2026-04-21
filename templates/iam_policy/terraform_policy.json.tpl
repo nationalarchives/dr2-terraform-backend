@@ -25,6 +25,7 @@
         "logs:*",
         "organizations:DescribeOrganization",
         "pipes:*",
+        "rolesanywhere:*",
         "route53:*",
         "route53resolver:*",
         "securityhub:*",
