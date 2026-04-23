@@ -23,9 +23,8 @@
           "staging",
           "prod"
         ],
-        "countType": "sinceImagePushed",
-        "countUnit": "days",
-        "countNumber": 73000
+        "countType": "imageCountMoreThan",
+        "countNumber": 9999
       },
       "action": {
         "type": "expire"
