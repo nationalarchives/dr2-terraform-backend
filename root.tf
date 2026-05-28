@@ -168,6 +168,7 @@ module "custodial_copy_backend_repository" {
     ]),
     account_number = data.aws_caller_identity.current.account_id
   })
+  lifecycle_policy = templatefile("${path.module}/templates/ecr/lifecycle_policy.json.tpl", {})
   common_tags      = {}
   image_source_url = "https://github.com/nationalarchives/dr2-custodial-copy"
 }
@@ -183,6 +184,7 @@ module "custodial_copy_db_builder_repository" {
     ]),
     account_number = data.aws_caller_identity.current.account_id
   })
+  lifecycle_policy = templatefile("${path.module}/templates/ecr/lifecycle_policy.json.tpl", {})
   common_tags      = {}
   image_source_url = "https://github.com/nationalarchives/dr2-custodial-copy"
 }
@@ -198,6 +200,7 @@ module "custodial_copy_webapp_repository" {
     ]),
     account_number = data.aws_caller_identity.current.account_id
   })
+  lifecycle_policy = templatefile("${path.module}/templates/ecr/lifecycle_policy.json.tpl", {})
   common_tags      = {}
   image_source_url = "https://github.com/nationalarchives/dr2-custodial-copy"
 }
@@ -213,6 +216,7 @@ module "custodial_copy_reindexer_repository" {
     ]),
     account_number = data.aws_caller_identity.current.account_id
   })
+  lifecycle_policy = templatefile("${path.module}/templates/ecr/lifecycle_policy.json.tpl", {})
   common_tags      = {}
   image_source_url = "https://github.com/nationalarchives/dr2-custodial-copy"
 }
@@ -228,6 +232,7 @@ module "custodial_copy_confirmer_repository" {
     ]),
     account_number = data.aws_caller_identity.current.account_id
   })
+  lifecycle_policy = templatefile("${path.module}/templates/ecr/lifecycle_policy.json.tpl", {})
   common_tags      = {}
   image_source_url = "https://github.com/nationalarchives/dr2-custodial-copy"
 }
