@@ -164,10 +164,7 @@ module "custodial_copy_backend_repository" {
     allowed_principals = jsonencode([
       "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:role/intg-dr2-custodial-copy",
       "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:role/staging-dr2-custodial-copy",
-      "arn:aws:iam::${data.aws_ssm_parameter.prod_account_number.value}:role/prod-dr2-custodial-copy",
-      "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:user/intg-dr2-custodial-copy",
-      "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:user/staging-dr2-custodial-copy",
-      "arn:aws:iam::${data.aws_ssm_parameter.prod_account_number.value}:user/prod-dr2-custodial-copy"
+      "arn:aws:iam::${data.aws_ssm_parameter.prod_account_number.value}:role/prod-dr2-custodial-copy"
     ]),
     account_number = data.aws_caller_identity.current.account_id
   })
@@ -183,10 +180,7 @@ module "custodial_copy_db_builder_repository" {
     allowed_principals = jsonencode([
       "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:role/intg-dr2-custodial-copy",
       "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:role/staging-dr2-custodial-copy",
-      "arn:aws:iam::${data.aws_ssm_parameter.prod_account_number.value}:role/prod-dr2-custodial-copy",
-      "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:user/intg-dr2-custodial-copy",
-      "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:user/staging-dr2-custodial-copy",
-      "arn:aws:iam::${data.aws_ssm_parameter.prod_account_number.value}:user/prod-dr2-custodial-copy"
+      "arn:aws:iam::${data.aws_ssm_parameter.prod_account_number.value}:role/prod-dr2-custodial-copy"
     ]),
     account_number = data.aws_caller_identity.current.account_id
   })
@@ -202,10 +196,7 @@ module "custodial_copy_webapp_repository" {
     allowed_principals = jsonencode([
       "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:role/intg-dr2-custodial-copy",
       "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:role/staging-dr2-custodial-copy",
-      "arn:aws:iam::${data.aws_ssm_parameter.prod_account_number.value}:role/prod-dr2-custodial-copy",
-      "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:user/intg-dr2-custodial-copy",
-      "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:user/staging-dr2-custodial-copy",
-      "arn:aws:iam::${data.aws_ssm_parameter.prod_account_number.value}:user/prod-dr2-custodial-copy"
+      "arn:aws:iam::${data.aws_ssm_parameter.prod_account_number.value}:role/prod-dr2-custodial-copy"
     ]),
     account_number = data.aws_caller_identity.current.account_id
   })
@@ -221,10 +212,7 @@ module "custodial_copy_reindexer_repository" {
     allowed_principals = jsonencode([
       "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:role/intg-dr2-custodial-copy",
       "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:role/staging-dr2-custodial-copy",
-      "arn:aws:iam::${data.aws_ssm_parameter.prod_account_number.value}:role/prod-dr2-custodial-copy",
-      "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:user/intg-dr2-custodial-copy",
-      "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:user/staging-dr2-custodial-copy",
-      "arn:aws:iam::${data.aws_ssm_parameter.prod_account_number.value}:user/prod-dr2-custodial-copy"
+      "arn:aws:iam::${data.aws_ssm_parameter.prod_account_number.value}:role/prod-dr2-custodial-copy"
     ]),
     account_number = data.aws_caller_identity.current.account_id
   })
@@ -240,10 +228,7 @@ module "custodial_copy_confirmer_repository" {
     allowed_principals = jsonencode([
       "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:role/intg-dr2-custodial-copy",
       "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:role/staging-dr2-custodial-copy",
-      "arn:aws:iam::${data.aws_ssm_parameter.prod_account_number.value}:role/prod-dr2-custodial-copy",
-      "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:user/intg-dr2-custodial-copy",
-      "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:user/staging-dr2-custodial-copy",
-      "arn:aws:iam::${data.aws_ssm_parameter.prod_account_number.value}:user/prod-dr2-custodial-copy"
+      "arn:aws:iam::${data.aws_ssm_parameter.prod_account_number.value}:role/prod-dr2-custodial-copy"
     ]),
     account_number = data.aws_caller_identity.current.account_id
   })
@@ -252,6 +237,20 @@ module "custodial_copy_confirmer_repository" {
   image_source_url = "https://github.com/nationalarchives/dr2-custodial-copy"
 }
 
+module "custodial_copy_reconciler_repository" {
+  source          = "git::https://github.com/nationalarchives/da-terraform-modules.git//ecr"
+  repository_name = "dr2-custodial-copy-reconciler"
+  repository_policy = templatefile("${path.module}/templates/ecr/cross_account_repository_policy.json.tpl", {
+    allowed_principals = jsonencode([
+      "arn:aws:iam::${data.aws_ssm_parameter.intg_account_number.value}:role/intg-dr2-custodial-copy",
+      "arn:aws:iam::${data.aws_ssm_parameter.staging_account_number.value}:role/staging-dr2-custodial-copy",
+      "arn:aws:iam::${data.aws_ssm_parameter.prod_account_number.value}:role/prod-dr2-custodial-copy"
+    ]),
+    account_number = data.aws_caller_identity.current.account_id
+  })
+  common_tags      = {}
+  image_source_url = "https://github.com/nationalarchives/dr2-custodial-copy"
+}
 
 module "image_deploy_role" {
   source = "git::https://github.com/nationalarchives/da-terraform-modules.git//iam_role"
