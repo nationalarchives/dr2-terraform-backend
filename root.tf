@@ -385,8 +385,8 @@ module "library_put_events_role" {
   assume_role_policy = templatefile("${path.module}/templates/iam_role/github_assume_role.json.tpl", {
     account_id = data.aws_caller_identity.current.account_id,
     repo_filters = jsonencode([
-      "repo:nationalarchives/da-aws-clients@641821052:ref:refs/heads/main",
-      "repo:nationalarchives/dr2-preservica-client@632653323:ref:refs/heads/main"
+      "repo:nationalarchives@10154228/da-aws-clients@641821052:ref:refs/heads/main",
+      "repo:nationalarchives@10154228/dr2-preservica-client@632653323:ref:refs/heads/main"
     ])
   })
   name = "mgmt-library-put-events-role"
