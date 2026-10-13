@@ -61,6 +61,7 @@
         "arn:aws:iam::${account_id}:policy/${environment}*",
         "arn:aws:iam::${account_id}:policy/${environment_title}*",
         "arn:aws:iam::${account_id}:policy/AWSSSO_DAArchivist",
+        "arn:aws:iam::${account_id}:policy/AWSSSO_DAPAArchivist",
         "arn:aws:iam::${account_id}:instance-profile/${environment}*"
       ]
     },
