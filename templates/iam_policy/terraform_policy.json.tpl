@@ -7,6 +7,7 @@
       "Action": [
         "autoscaling:*",
         "athena:*",
+        "cloudformation:*",
         "cloudtrail:*",
         "cloudwatch:*",
         "cloudfront:*",
